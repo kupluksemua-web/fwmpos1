@@ -1,0 +1,140 @@
+{% extends "base.html"%}
+{% block title %}Tambah Transaksi{% endblock %}
+
+{% block content %}
+    <h1>Tambah Transaksi</h1>
+    <hr>
+    
+    <h3>1. Pilih Pelanggan</h3>
+    <select id="pilihPelanggan">
+        <option value="" disabled selected>-- Pilih Pelanggan --</option>
+        {% for p in pelanggan %}
+            <option value="{{ p.id }}">{{ p.nama_pelanggan }} - {{ p.nomor_telepon }}</option>
+        {% endfor %}
+    </select>
+    <hr>
+
+    <h3>2. Tambah Produk</h3>
+    <select id="pilihProduk">
+        <option value="" disabled selected>-- Pilih Produk --</option>
+        {% for pr in produk %}
+            <option value="{{ pr.id }}" data-nama="{{ pr.nama_produk }}" data-harga="{{ pr.harga }}">
+                {{ pr.nama_produk }} - Rp{{ pr.harga }}
+            </option>
+        {% endfor %}
+    </select>
+    <input type="number" id="jumlahProduk" placeholder="Jumlah" min="1">
+    <button type="button" onclick="tambahKeKeranjang()">Tambah ke List</button>
+    <hr>
+
+    <h3>3. Produk yang dipilih</h3>
+    <ul id="listKeranjang">
+        </ul>
+    <hr>
+
+    <label>Total Belanja: Rp <span id="labelTotal">0</span></label><br>
+    <label>Diskon: Rp </label>
+    <input type="number" id="inputDiskon" value="0" min="0" oninput="hitungTotalAkhir()"><br>
+    <label><strong>Total Akhir: Rp <span id="labelTotalAkhir">0</span></strong></label><br><br>
+
+    <button type="button" onclick="buatTransaksi()">Buat Transaksi</button>
+
+    <script>
+        // Array untuk menyimpan data barang sementara
+        let keranjang = [];
+        let totalBelanja = 0;
+
+        function tambahKeKeranjang() {
+            const dropdownProduk = document.getElementById('pilihProduk');
+            const opsiTerpilih = dropdownProduk.options[dropdownProduk.selectedIndex];
+            const jumlah = parseInt(document.getElementById('jumlahProduk').value);
+
+            // Validasi jika belum pilih produk atau jumlah kosong
+            if (opsiTerpilih.value === "" || isNaN(jumlah) || jumlah <= 0) {
+                alert("Pilih produk dan masukkan jumlah yang benar!");
+                return;
+            }
+
+            // Ambil data dari tag option
+            const produkId = opsiTerpilih.value;
+            const namaProduk = opsiTerpilih.getAttribute('data-nama');
+            const harga = parseInt(opsiTerpilih.getAttribute('data-harga'));
+            
+            // Masukkan ke array keranjang
+            keranjang.push({
+                produk_id: produkId,
+                nama: namaProduk,
+                harga: harga,
+                jumlah: jumlah
+            });
+
+            tampilkanKeranjang();
+        }
+
+        function tampilkanKeranjang() {
+            const list = document.getElementById('listKeranjang');
+            list.innerHTML = ''; // Kosongkan list HTML
+            totalBelanja = 0;    // Reset hitungan
+
+            // Looping isi array keranjang
+            keranjang.forEach((item, index) => {
+                const subtotal = item.harga * item.jumlah;
+                totalBelanja += subtotal;
+
+                // Buat elemen <li> baru
+                const li = document.createElement('li');
+                li.innerHTML = `${item.nama} - Rp${item.harga} x ${item.jumlah} = Rp${subtotal}`;
+                list.appendChild(li);
+            });
+
+            hitungTotalAkhir();
+        }
+
+        function hitungTotalAkhir() {
+            document.getElementById('labelTotal').innerText = totalBelanja;
+            
+            let diskon = parseInt(document.getElementById('inputDiskon').value);
+            if(isNaN(diskon)) diskon = 0;
+
+            const totalAkhir = totalBelanja - diskon;
+            document.getElementById('labelTotalAkhir').innerText = totalAkhir;
+        }
+
+        async function buatTransaksi() {
+            const pelangganId = document.getElementById('pilihPelanggan').value;
+            const diskon = document.getElementById('inputDiskon').value;
+
+            // Validasi sebelum kirim ke database
+            if (pelangganId === "") {
+                alert("Pilih pelanggan terlebih dahulu!");
+                return;
+            }
+            if (keranjang.length === 0) {
+                alert("Keranjang masih kosong!");
+                return;
+            }
+
+            // Kemas data menjadi format JSON
+            const dataKirim = {
+                pelanggan_id: pelangganId,
+                diskon: diskon,
+                keranjang: keranjang
+            };
+
+            // Kirim ke rute Python menggunakan Fetch API
+            const response = await fetch('/tambahtransaksi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataKirim)
+            });
+
+            const hasil = await response.json();
+            
+            // Jika sukses, pindah halaman sesuai URL dari Python
+            if (hasil.status === 'success') {
+                alert("Transaksi Berhasil Dibuat!");
+                window.location.href = hasil.redirect_url;
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html"%}
+{% block title %}Detail Transaksi{% endblock %}
+
+{% block content %}
+    <h1>Nota Transaksi #{{ transaksi.id }}</h1>
+    
+    <p><strong>Waktu Masuk:</strong> {{ transaksi.tanggal.strftime('%Y-%m-%d') }} {{ transaksi.waktu.strftime('%H:%M:%S') }}</p>
+    
+    <p><strong>Estimasi Selesai:</strong> {{ transaksi.waktu_selesai.strftime('%Y-%m-%d') }}</p>
+    
+    <p><strong>Status Cucian:</strong> {{ transaksi.status }}</p>
+    <p><strong>Status Pembayaran:</strong> {{ transaksi.status_pembayaran }}</p>
+    <hr>
+    
+    <h3>Informasi Pelanggan</h3>
+    <p><strong>Nama:</strong> {{ transaksi.pelanggan.nama_pelanggan }}</p>
+    <p><strong>No. Telepon:</strong> {{ transaksi.pelanggan.nomor_telepon }}</p>
+    <p><strong>Alamat:</strong> {{ transaksi.pelanggan.alamat }}</p>
+    <hr>
+    
+    <h3>Rincian Pesanan</h3>
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; max-width: 600px;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th>Nama Produk</th>
+                <th>Harga Satuan</th>
+                <th>Kuantitas</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in transaksi.detail_transaksi %}
+                <tr>
+                    <td>{{ detail.produk.nama_produk }}</td>
+                    <td>Rp {{ detail.produk.harga }}</td>
+                    <td>{{ detail.kuantitas }} {{ detail.produk.satuan }}</td>
+                    <td>Rp {{ detail.total_harga_produk }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    
+    <div style="max-width: 600px; text-align: right;">
+        <p><strong>Total Belanja:</strong> Rp {{ transaksi.total_harga_transaksi + transaksi.diskon }}</p>
+        <p><strong>Diskon:</strong> Rp {{ transaksi.diskon }}</p>
+        <h3><strong>Total Akhir: Rp {{ transaksi.total_harga_transaksi }}</strong></h3>
+    </div>
+    
+    <hr>
+    <a href="{{ url_for('index') }}">
+        <button type="button">Kembali ke Beranda</button>
+        <button type="button" onclick="window.open('{{ url_for('cetaktransaksi', id=transaksi.id) }}', '_blank')">
+        Cetak Struk
+        </button>
+        <button type="button" onclick="kirimWA()" style="background-color: #25D366; color: white; border: none; padding: 5px 10px; cursor: pointer;">
+            Chat ke WA
+        </button>
+    </a>
+
+<script>
+        function kirimWA() {
+            let noWa = "{{ transaksi.pelanggan.nomor_telepon }}";
+            
+            if (noWa.startsWith("0")) {
+                noWa = "62" + noWa.substring(1);
+            } else if (noWa.startsWith("+")) {
+                noWa = noWa.substring(1); 
+            }
+
+            let rincianPesanan = "";
+            {% for detail in transaksi.detail_transaksi %}
+            // Perbaikan: Mengganti kutip ganda dengan backtick (`) agar aman dari string yang terpotong
+            rincianPesanan += `- {{ detail.produk.nama_produk }} ({{ detail.kuantitas }} {{ detail.produk.satuan }}) : Rp {{ detail.total_harga_produk }}\n`;
+            {% endfor %}
+
+            // Perbaikan: Menghapus tanda $ di depan {{ transaksi.id }} 
+            // Perbaikan: Menambahkan ( ... or 0) pada diskon
+            let pesan = `*Nota Transaksi #{{ transaksi.id }}*
+Yth. Pelanggan: {{ transaksi.pelanggan.nama_pelanggan }}
+
+Halo, Kak! Berikut adalah rincian nota transaksi laundry Anda:
+
+📅 *Informasi Transaksi*
+Waktu Masuk: {{ transaksi.tanggal.strftime('%Y-%m-%d') }} {{ transaksi.waktu.strftime('%H:%M:%S') }}
+Estimasi Selesai: {{ transaksi.waktu_selesai.strftime('%Y-%m-%d') }}
+Status Cucian: {{ transaksi.status }}
+Status Pembayaran: {{ transaksi.status_pembayaran }}
+
+📍 *Data Pelanggan*
+Nama: {{ transaksi.pelanggan.nama_pelanggan }}
+No. Telp: {{ transaksi.pelanggan.nomor_telepon }}
+Alamat: {{ transaksi.pelanggan.alamat }}
+
+🧺 *Rincian Pesanan*
+${rincianPesanan}
+💰 *Rincian Biaya*
+Total Belanja: Rp {{ transaksi.total_harga_transaksi + (transaksi.diskon or 0) }}
+Diskon: Rp {{ (transaksi.diskon or 0) }}
+*TOTAL AKHIR: Rp {{ transaksi.total_harga_transaksi }}*
+
+Terima kasih telah mempercayakan cucian Anda kepada kami! Jika ada pertanyaan, silakan hubungi kami kembali.`;
+
+            let urlWA = `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
+            window.open(urlWA, '_blank');
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html"%}
+{% block title %}Cari Customer{% endblock %}
+
+{% block content %}
+    <h1>Cari Customer</h1>
+    
+    <form action="{{ url_for('caricustomer') }}" method="POST">
+        
+        <label for="pelanggan_id">Pilih Nama Pelanggan:</label>
+        
+        <select name="pelanggan_id" id="pelanggan_id" required>
+            <option value="" disabled selected>-- Klik di sini untuk memilih --</option>
+            
+            {% for pelanggan in daftar_pelanggan %}
+                <option value="{{ pelanggan.id }}">{{ pelanggan.nama_pelanggan }} - {{ pelanggan.nomor_telepon }}</option>
+            {% endfor %}
+        </select>
+        
+        <br><br>
+        <input type="submit" value="Lihat Detail">
+    </form>
+    
+    <hr>
+{% endblock %}

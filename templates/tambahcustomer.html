@@ -1,0 +1,16 @@
+{% extends "base.html"%}
+{% block title %}Tambah Customer{% endblock %}
+
+{% block content %}
+    <h1>Tambah Customer</h1>
+    
+    <form action="{{ url_for('tambahcustomer') }}" method="POST">
+        <input type="text" name="name" placeholder="Name" required="required"><br>
+        <input type="number" name="nomortelepon" placeholder="Nomor Telepon"><br>
+        <input type="text" name="alamat" placeholder="Alamat"><br>
+        
+        <input type="text" name="catatan" placeholder="Catatan Khusus"><br>
+        
+        <input type="submit" value="Create">
+    </form>
+{% endblock %}

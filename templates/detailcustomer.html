@@ -1,0 +1,47 @@
+{% extends "base.html"%}
+{% block title %}Detail Customer{% endblock %}
+
+{% block content %}
+    <h1>Detail Customer</h1><br>
+    
+    <p><strong>Nama :</strong> {{ pelanggan.nama_pelanggan }}</p>
+    <p><strong>Nomor Telepon :</strong> {{ pelanggan.nomor_telepon }}</p>
+    <p><strong>Alamat :</strong> {{ pelanggan.alamat }}</p>
+    <p><strong>Catatan :</strong> {{ pelanggan.catatan_unik }}</p>
+    
+    <hr>
+    <h1>Daftar Transaksi</h1>
+    
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID Nota</th>
+                <th>Tanggal & Waktu</th>
+                <th>Total Belanja</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in pelanggan.transaksi %}
+                <tr>
+                    <td>#{{ t.id }}</td>
+                    <td>{{ t.tanggal.strftime('%Y-%m-%d') }} {{ t.waktu.strftime('%H:%M') }}</td>
+                    <td>Rp {{ t.total_harga_transaksi }}</td>
+                    
+                    <td>{{ t.status }}</td>
+                    
+                    <td>
+                        <a href="{{ url_for('detailtransaksi', id=t.id) }}">Lihat Nota</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">Belum ada riwayat transaksi.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <a href="{{ url_for('index') }}"><button>Kembali ke Beranda</button></a>
+{% endblock %}

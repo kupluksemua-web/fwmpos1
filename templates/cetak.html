@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struk #{{ transaksi.id }}</title>
+    <style>
+        /* Pengaturan khusus untuk Printer Thermal 58mm */
+        @page {
+            margin: 0; /* Menghilangkan margin default browser saat mencetak */
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace; /* Font struk kasir standar */
+            font-size: 12px;
+            color: #000;
+            margin: 0;
+            padding: 5px; 
+            width: 58mm; /* Lebar kertas thermal */
+            box-sizing: border-box;
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .fw-bold { font-weight: bold; }
+        
+        /* Garis putus-putus khas struk */
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 5px 0;
+        }
+
+        /* Penekanan untuk Karyawan */
+        .nama-pelanggan {
+            font-size: 18px; /* Dibuat besar sesuai permintaan */
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 5px 0;
+        }
+        
+        .tgl-selesai {
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #000;
+            color: #fff;
+            padding: 2px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        /* Tabel Rincian */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td {
+            vertical-align: top;
+            padding: 2px 0;
+        }
+
+        /* Sembunyikan elemen ini saat masuk mode cetak (kertas) */
+        @media print {
+            .no-print { display: none !important; }
+            body { width: 100%; padding: 0; } /* Reset padding di dalam mesin printer */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center">
+        <strong>FWM LAUNDRY</strong><br>
+        <small>(Karyawan Copy)</small><br>
+        <div class="divider"></div>
+        
+        <div class="nama-pelanggan">{{ transaksi.pelanggan.nama_pelanggan }}</div>
+        
+        <div class="tgl-selesai">
+            SELESAI: {{ transaksi.waktu_selesai.strftime('%d-%m-%Y') }}
+        </div>
+    </div>
+
+    <div class="divider"></div>
+    <div>Nota: #{{ transaksi.id }}</div>
+    <div>Tgl Masuk: {{ transaksi.tanggal.strftime('%d-%m-%Y') }}</div>
+    <div class="divider"></div>
+
+    <table>
+        {% for detail in transaksi.detail_transaksi %}
+        <tr>
+            <td colspan="2">{{ detail.produk.nama_produk }}</td>
+        </tr>
+        <tr>
+            <td style="padding-left: 10px;">{{ detail.kuantitas }} {{ detail.produk.satuan }}</td>
+            <td class="text-right">Rp {{ detail.total_harga_produk }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="divider"></div>
+    
+    <table>
+        <tr>
+            <td class="fw-bold" style="font-size: 14px;">TOTAL</td>
+            <td class="fw-bold text-right" style="font-size: 14px;">Rp {{ transaksi.total_harga_transaksi }}</td>
+        </tr>
+    </table>
+    
+    <div class="divider"></div>
+    <div class="text-center" style="margin-bottom: 20px;">
+        ***
+    </div>
+
+    <div class="no-print" style="margin-top: 20px; text-align: center;">
+        <button onclick="window.print()" style="padding: 10px; width: 90%; background: #007bff; color: white; border: none; margin-bottom: 10px;">Cetak Ulang</button>
+        <button onclick="window.close()" style="padding: 10px; width: 90%; background: #dc3545; color: white; border: none;">Tutup Tab</button>
+    </div>
+
+    <script>
+        // Otomatis memicu perintah cetak saat tab baru dibuka
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

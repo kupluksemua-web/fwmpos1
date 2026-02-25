@@ -1,0 +1,31 @@
+{% extends "base.html"%}
+{% block title %}Index Page{% endblock %}
+
+{% block content %}
+    <h1>Hello World</h1>
+    <a href="{{ url_for('tambahcustomer') }}">
+        <button>Tambah Customer</button>
+    </a><br><br>
+    <a href="{{ url_for('tambahtransaksi') }}">
+        <button>Tambah Transaksi</button>
+    </a><br><br>
+    <a href="{{ url_for('caricustomer') }}">
+        <button>Cari Customer</button>
+    </a><br>
+    
+    <hr>
+    
+    <h2>Transaksi Hari ini</h2>
+    <ul>
+        {% for t in transaksi %}
+            <li>
+                <strong>Nota #{{ t.id }}</strong> - 
+                {{ t.pelanggan.name }} - 
+                Rp {{ t.total_harga_transaksi }} 
+                <a href="{{ url_for('detailtransaksi', id=t.id) }}">[Lihat Detail]</a>
+            </li>
+        {% else %}
+            <li>Belum ada transaksi yang masuk hari ini. Ayo semangat!</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
