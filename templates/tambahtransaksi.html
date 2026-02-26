@@ -23,7 +23,7 @@
             </option>
         {% endfor %}
     </select>
-    <input type="number" id="jumlahProduk" placeholder="Jumlah" min="1">
+    <input type="number" id="jumlahProduk" placeholder="Jumlah" min="0.1" step="0.01">
     <button type="button" onclick="tambahKeKeranjang()">Tambah ke List</button>
     <hr>
 
@@ -40,27 +40,23 @@
     <button type="button" onclick="buatTransaksi()">Buat Transaksi</button>
 
     <script>
-        // Array untuk menyimpan data barang sementara
         let keranjang = [];
         let totalBelanja = 0;
 
         function tambahKeKeranjang() {
             const dropdownProduk = document.getElementById('pilihProduk');
             const opsiTerpilih = dropdownProduk.options[dropdownProduk.selectedIndex];
-            const jumlah = parseInt(document.getElementById('jumlahProduk').value);
+            const jumlah = parseFloat(document.getElementById('jumlahProduk').value);
 
-            // Validasi jika belum pilih produk atau jumlah kosong
             if (opsiTerpilih.value === "" || isNaN(jumlah) || jumlah <= 0) {
                 alert("Pilih produk dan masukkan jumlah yang benar!");
                 return;
             }
 
-            // Ambil data dari tag option
             const produkId = opsiTerpilih.value;
             const namaProduk = opsiTerpilih.getAttribute('data-nama');
             const harga = parseInt(opsiTerpilih.getAttribute('data-harga'));
             
-            // Masukkan ke array keranjang
             keranjang.push({
                 produk_id: produkId,
                 nama: namaProduk,
@@ -68,22 +64,36 @@
                 jumlah: jumlah
             });
 
+            // Reset input jumlah setelah berhasil ditambah
+            document.getElementById('jumlahProduk').value = '';
+            
+            tampilkanKeranjang();
+        }
+
+        // FUNGSI BARU: Menghapus item berdasarkan index (urutan) di array
+        function hapusDariKeranjang(index) {
+            // Hapus 1 elemen dari array pada posisi 'index'
+            keranjang.splice(index, 1);
+            
+            // Render ulang tampilan keranjang
             tampilkanKeranjang();
         }
 
         function tampilkanKeranjang() {
             const list = document.getElementById('listKeranjang');
-            list.innerHTML = ''; // Kosongkan list HTML
-            totalBelanja = 0;    // Reset hitungan
+            list.innerHTML = ''; 
+            totalBelanja = 0;    
 
-            // Looping isi array keranjang
             keranjang.forEach((item, index) => {
                 const subtotal = item.harga * item.jumlah;
                 totalBelanja += subtotal;
 
-                // Buat elemen <li> baru
                 const li = document.createElement('li');
-                li.innerHTML = `${item.nama} - Rp${item.harga} x ${item.jumlah} = Rp${subtotal}`;
+                // Menambahkan tombol "Hapus" yang memanggil hapusDariKeranjang(index)
+                li.innerHTML = `
+                    ${item.nama} - Rp${item.harga} x ${item.jumlah} = Rp${subtotal}
+                    <button type="button" onclick="hapusDariKeranjang(${index})" style="margin-left: 10px; color: red; cursor: pointer;">Hapus</button>
+                `;
                 list.appendChild(li);
             });
 
@@ -97,14 +107,14 @@
             if(isNaN(diskon)) diskon = 0;
 
             const totalAkhir = totalBelanja - diskon;
-            document.getElementById('labelTotalAkhir').innerText = totalAkhir;
+            // Cegah total akhir menjadi minus jika diskon lebih besar dari total belanja
+            document.getElementById('labelTotalAkhir').innerText = totalAkhir > 0 ? totalAkhir : 0;
         }
 
         async function buatTransaksi() {
             const pelangganId = document.getElementById('pilihPelanggan').value;
-            const diskon = document.getElementById('inputDiskon').value;
+            const diskon = document.getElementById('inputDiskon').value || 0;
 
-            // Validasi sebelum kirim ke database
             if (pelangganId === "") {
                 alert("Pilih pelanggan terlebih dahulu!");
                 return;
@@ -114,14 +124,12 @@
                 return;
             }
 
-            // Kemas data menjadi format JSON
             const dataKirim = {
                 pelanggan_id: pelangganId,
                 diskon: diskon,
                 keranjang: keranjang
             };
 
-            // Kirim ke rute Python menggunakan Fetch API
             const response = await fetch('/tambahtransaksi', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -130,10 +138,11 @@
 
             const hasil = await response.json();
             
-            // Jika sukses, pindah halaman sesuai URL dari Python
             if (hasil.status === 'success') {
                 alert("Transaksi Berhasil Dibuat!");
                 window.location.href = hasil.redirect_url;
+            } else {
+                alert("Terjadi kesalahan: " + (hasil.message || "Gagal membuat transaksi."));
             }
         }
     </script>

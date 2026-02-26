@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk #{{ transaksi.id }}</title>
+    <title>Struk {{ transaksi.id }}</title>
     <style>
         /* Pengaturan khusus untuk Printer Thermal 58mm */
         @page {
@@ -49,6 +49,16 @@
             margin-bottom: 5px;
         }
 
+        /* TAMBAHAN: Styling untuk catatan unik */
+        .catatan-karyawan {
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #000;
+            padding: 3px;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
         /* Tabel Rincian */
         table {
             width: 100%;
@@ -80,15 +90,22 @@
         </div>
     </div>
 
+    {% if transaksi.pelanggan.catatan_unik %}
+    <div class="catatan-karyawan">
+        CATATAN:<br>
+        {{ transaksi.pelanggan.catatan_unik }}
+    </div>
+    {% endif %}
+
     <div class="divider"></div>
-    <div>Nota: #{{ transaksi.id }}</div>
+    <div>Nota: {{ transaksi.id }}</div>
     <div>Tgl Masuk: {{ transaksi.tanggal.strftime('%d-%m-%Y') }}</div>
     <div class="divider"></div>
 
     <table>
         {% for detail in transaksi.detail_transaksi %}
         <tr>
-            <td colspan="2">{{ detail.produk.nama_produk }}</td>
+            <td colspan="2">- {{ detail.produk.nama_produk }}</td>
         </tr>
         <tr>
             <td style="padding-left: 10px;">{{ detail.kuantitas }} {{ detail.produk.satuan }}</td>
