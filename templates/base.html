@@ -1,12 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Defult Value{% endblock %}</title>
+    <title>{% block title %}Default Value{% endblock %}</title>
+    
+    <style>
+        /* Desain sederhana untuk Bar Navigasi di Atas (TOP) */
+        .top-nav {
+            background-color: #007bff; /* Warna biru */
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 0 0 10px 10px; /* Sudut bawah membulat */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+        
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <p>Ini Bakal selalu ada</p>
-    {% block content%}{% endblock %}
+    
+    <div class="top-nav">
+        <a href="{{ url_for('index') }}">🏠 FWM Laundry - Beranda</a>
+    </div>
+
+    <div style="padding: 0 20px;">
+        {% block content %}{% endblock %}
+    </div>
+
 </body>
 </html>

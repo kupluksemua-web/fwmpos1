@@ -3,12 +3,14 @@
 
 {% block content %}
     <h1>Detail Customer</h1><br>
-    
+    <a href="{{ url_for('editcustomer', id=pelanggan.id) }}">
+    <button style="background-color: orange; color: white;">Edit Profil Customer</button>
+    </a>
     <p><strong>Nama :</strong> {{ pelanggan.nama_pelanggan }}</p>
     <p><strong>Nomor Telepon :</strong> {{ pelanggan.nomor_telepon }}</p>
     <p><strong>Alamat :</strong> {{ pelanggan.alamat }}</p>
     <p><strong>Catatan :</strong> {{ pelanggan.catatan_unik }}</p>
-    
+    <p><strong>Tanggal Bergabung :</strong> {{ pelanggan.tanggal_input.strftime('%d %B %Y') if pelanggan.tanggal_input else '-' }}</p>
     <hr>
     <h1>Daftar Transaksi</h1>
     

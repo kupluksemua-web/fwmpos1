@@ -4,12 +4,14 @@ from datetime import datetime
 class Pelanggan(db.Model):
     __tablename__ = 'datapelanggan'
 
-    # Sesuai permintaan: pid diubah menjadi id, name menjadi nama_pelanggan, dsb.
     id = db.Column(db.Integer, primary_key=True)
     nama_pelanggan = db.Column(db.Text, nullable=False)
     nomor_telepon = db.Column(db.Text)
     alamat = db.Column(db.Text)
     catatan_unik = db.Column(db.Text)
+    
+    # TAMBAHAN KOLOM BARU
+    tanggal_input = db.Column(db.Date, default=lambda: datetime.now().date())
 
     transaksi = db.relationship('Transaksi', backref='pelanggan', lazy=True)
 
@@ -38,7 +40,7 @@ class Produk(db.Model):
 class Transaksi(db.Model):
     __tablename__ = 'datatransaksi'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(50), primary_key=True)
     
     # UBAH: utcnow menjadi now, dan gunakan lambda agar waktu selalu real-time
     tanggal = db.Column(db.Date, default=lambda: datetime.now().date())
@@ -63,8 +65,8 @@ class Transaksi(db.Model):
 class DetailTransaksi(db.Model):
     __tablename__ = 'datadetailtransaksi'
 
-    id = db.Column(db.Integer, primary_key=True)
-    kuantitas = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.String(50), primary_key=True)
+    kuantitas = db.Column(db.Float, nullable=False)
     total_harga_produk = db.Column(db.Integer, nullable=False)
 
     transaksi_id = db.Column(db.Integer, db.ForeignKey('datatransaksi.id'), nullable=False)
