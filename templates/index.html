@@ -11,6 +11,9 @@
     </a><br><br>
     <a href="{{ url_for('caricustomer') }}">
         <button>Cari Customer</button>
+    </a><br><br>
+    <a href="{{ url_for('updatestatus') }}">
+        <button>Update Status</button>
     </a><br>
     
     <hr>
@@ -20,7 +23,7 @@
         {% for t in transaksi %}
             <li>
                 <strong>Nota #{{ t.id }}</strong> - 
-                {{ t.pelanggan.name }} - 
+                {{ t.pelanggan.nama_pelanggan }} - 
                 Rp {{ t.total_harga_transaksi }} 
                 <a href="{{ url_for('detailtransaksi', id=t.id) }}">[Lihat Detail]</a>
             </li>

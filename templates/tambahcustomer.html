@@ -6,7 +6,12 @@
     
     <form action="{{ url_for('tambahcustomer') }}" method="POST">
         <input type="text" name="name" placeholder="Name" required="required"><br>
-        <input type="number" name="nomortelepon" placeholder="Nomor Telepon"><br>
+        <input type="text" 
+            name="nomortelepon" 
+            placeholder="Nomor Telepon" 
+            pattern="^08[0-9]{8,11}$" 
+            title="Nomor telepon harus diawali '08' dan terdiri dari 10 hingga 13 digit angka." 
+            required><br>
         <input type="text" name="alamat" placeholder="Alamat"><br>
         
         <input type="text" name="catatan" placeholder="Catatan Khusus"><br>
