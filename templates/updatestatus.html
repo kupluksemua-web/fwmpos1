@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Update Status Transaksi{% endblock %}
+
+{% block content %}
+<style>
+    /* Styling untuk Label Tab Status */
+    .status-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+    .tab-btn {
+        padding: 10px 20px;
+        border: 1px solid #007bff;
+        background-color: white;
+        color: #007bff;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        white-space: nowrap;
+        transition: 0.3s;
+    }
+    .tab-btn.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Styling untuk Container/Kartu Transaksi */
+    .trx-card {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        background-color: #fff;
+    }
+    .trx-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    .trx-name {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+    }
+    .trx-deadline {
+        background-color: #ffc107;
+        color: #000;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.85em;
+        font-weight: bold;
+    }
+    .trx-date {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    /* Styling Bar Geser (Swipe to Update) */
+    .swipe-container {
+        position: relative;
+        height: 50px;
+        background-color: #e9ecef;
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        user-select: none;
+    }
+    .swipe-text {
+        color: #495057;
+        font-weight: bold;
+        font-size: 0.95em;
+        z-index: 1;
+        pointer-events: none;
+    }
+    .swipe-btn {
+        position: absolute;
+        left: 2px;
+        top: 2px;
+        width: 46px;
+        height: 46px;
+        background-color: #28a745;
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        z-index: 2;
+        font-size: 1.2em;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+    .swipe-btn:active {
+        cursor: grabbing;
+    }
+    .swipe-progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background-color: #d4edda;
+        z-index: 0;
+    }
+</style>
+
+<h1>Update Status Transaksi</h1>
+<hr>
+
+<div class="status-tabs">
+    <button class="tab-btn active" onclick="filterStatus('Antri Cuci')">Antri Cuci</button>
+    <button class="tab-btn" onclick="filterStatus('Antri Setrika')">Antri Setrika</button>
+    <button class="tab-btn" onclick="filterStatus('Antri Packing')">Antri Packing</button>
+    <button class="tab-btn" onclick="filterStatus('Siap Diambil')">Siap Diambil</button>
+    <button class="tab-btn" onclick="filterStatus('Selesai')">Selesai</button>
+</div>
+
+<div id="list-transaksi">
+    {% for t in transaksi %}
+        {% set safe_id = t.id.replace('/', '-') %}
+
+        <div class="trx-card" data-status="{{ t.status }}" style="display: {% if t.status == 'Antri Cuci' or t.status == 'Menunggu' %}block{% else %}none{% endif %};">
+            <div class="trx-header">
+                <span class="trx-name">{{ t.pelanggan.nama_pelanggan }} ({{ t.id }})</span>
+                <span class="trx-deadline">Selesai: {{ t.waktu_selesai.strftime('%d-%m-%Y') }}</span>
+            </div>
+            <span class="trx-date">Masuk: {{ t.tanggal.strftime('%d-%m-%Y') }} | Waktu: {{ t.waktu.strftime('%H:%M') }}</span>
+            
+            {% if t.status != 'Selesai' %}
+            <div class="swipe-container" id="container-{{ safe_id }}">
+                <div class="swipe-progress" id="progress-{{ safe_id }}"></div>
+                <div class="swipe-text" id="text-{{ safe_id }}">Geser untuk Update ➔</div>
+                <div class="swipe-btn" id="btn-{{ safe_id }}" 
+                     onmousedown="startSwipe(event, '{{ safe_id }}', '{{ t.id }}')" 
+                     ontouchstart="startSwipe(event, '{{ safe_id }}', '{{ t.id }}')">❱</div>
+            </div>
+            {% else %}
+            <div style="text-align: center; color: #28a745; font-weight: bold; background: #e9ecef; padding: 10px; border-radius: 20px;">
+                ✔ Transaksi Selesai & Telah Diambil
+            </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <p>Belum ada transaksi.</p>
+    {% endfor %}
+</div>
+
+<script>
+    // --- FUNGSI UNTUK TAB FILTER STATUS ---
+    function filterStatus(status) {
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            if(btn.innerText === status) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        const cards = document.querySelectorAll('.trx-card');
+        cards.forEach(card => {
+            if(card.getAttribute('data-status') === status) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // --- LOGIKA SWIPE TO UPDATE ---
+    let isDragging = false;
+    let currentBtn = null;
+    let startX = 0;
+    let maxTranslate = 0;
+    
+    // Simpan 2 jenis ID
+    let currentSafeId = null;
+    let currentRealId = null; 
+
+    function startSwipe(e, safeId, realId) {
+        isDragging = true;
+        currentSafeId = safeId;
+        currentRealId = realId;
+        
+        currentBtn = document.getElementById(`btn-${safeId}`);
+        startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        
+        const container = document.getElementById(`container-${safeId}`);
+        maxTranslate = container.clientWidth - currentBtn.clientWidth - 4;
+        
+        currentBtn.style.transition = 'none';
+    }
+
+    document.addEventListener('mousemove', moveSwipe);
+    document.addEventListener('touchmove', moveSwipe);
+
+    function moveSwipe(e) {
+        if (!isDragging || !currentBtn) return;
+        
+        const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        let moveX = currentX - startX;
+
+        if (moveX < 0) moveX = 0;
+        if (moveX > maxTranslate) moveX = maxTranslate;
+
+        currentBtn.style.transform = `translateX(${moveX}px)`;
+        document.getElementById(`progress-${currentSafeId}`).style.width = `${moveX + 25}px`;
+    }
+
+    document.addEventListener('mouseup', endSwipe);
+    document.addEventListener('touchend', endSwipe);
+
+    function endSwipe() {
+        if (!isDragging || !currentBtn) return;
+        isDragging = false;
+
+        const currentTransform = currentBtn.style.transform;
+        const moveX = parseFloat(currentTransform.replace('translateX(', '').replace('px)', '')) || 0;
+
+        // JIKA GESERAN MENTOK KE KANAN
+        if (moveX >= maxTranslate - 5) {
+            currentBtn.style.transform = `translateX(${maxTranslate}px)`;
+            currentBtn.style.backgroundColor = "#28a745";
+            currentBtn.innerHTML = "⌛";
+            document.getElementById(`text-${currentSafeId}`).innerText = "Memproses...";
+            
+            // Mengirim request ke Python (routes.py)
+            fetch('/updatestatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trx_id: currentRealId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    document.getElementById(`text-${currentSafeId}`).innerText = "Berhasil!";
+                    // Refresh halaman setelah setengah detik agar kartu pindah ke tab selanjutnya
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+        } else {
+            // BATALKAN JIKA TIDAK MENTOK
+            currentBtn.style.transition = 'transform 0.3s ease';
+            currentBtn.style.transform = `translateX(0px)`;
+            document.getElementById(`progress-${currentSafeId}`).style.width = '0px';
+        }
+        
+        currentBtn = null;
+    }
+</script>
+{% endblock %}

@@ -1,15 +1,18 @@
 from app import db
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Pelanggan(db.Model):
     __tablename__ = 'datapelanggan'
 
-    # Sesuai permintaan: pid diubah menjadi id, name menjadi nama_pelanggan, dsb.
     id = db.Column(db.Integer, primary_key=True)
     nama_pelanggan = db.Column(db.Text, nullable=False)
     nomor_telepon = db.Column(db.Text)
     alamat = db.Column(db.Text)
     catatan_unik = db.Column(db.Text)
+    
+    # TAMBAHAN KOLOM BARU
+    tanggal_input = db.Column(db.Date, default=lambda: datetime.now().date())
 
     transaksi = db.relationship('Transaksi', backref='pelanggan', lazy=True)
 
@@ -38,7 +41,7 @@ class Produk(db.Model):
 class Transaksi(db.Model):
     __tablename__ = 'datatransaksi'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(50), primary_key=True)
     
     # UBAH: utcnow menjadi now, dan gunakan lambda agar waktu selalu real-time
     tanggal = db.Column(db.Date, default=lambda: datetime.now().date())
@@ -63,8 +66,8 @@ class Transaksi(db.Model):
 class DetailTransaksi(db.Model):
     __tablename__ = 'datadetailtransaksi'
 
-    id = db.Column(db.Integer, primary_key=True)
-    kuantitas = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.String(50), primary_key=True)
+    kuantitas = db.Column(db.Float, nullable=False)
     total_harga_produk = db.Column(db.Integer, nullable=False)
 
     transaksi_id = db.Column(db.Integer, db.ForeignKey('datatransaksi.id'), nullable=False)
@@ -72,3 +75,66 @@ class DetailTransaksi(db.Model):
 
     def __repr__(self):
         return f'<Detail: {self.kuantitas}x (Produk ID: {self.produk_id})>'
+    
+# Tabel Asosiasi untuk Many-to-Many (menghubungkan User dan Role)
+user_roles = db.Table('user_roles',
+    db.Column('user_id', db.Integer, db.ForeignKey('datauser.id'), primary_key=True),
+    db.Column('role_id', db.Integer, db.ForeignKey('datarole.id'), primary_key=True)
+)
+
+class Role(db.Model):
+    __tablename__ = 'datarole'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    nama_role = db.Column(db.String(50), unique=True, nullable=False) # Contoh: 'Admin', 'Kasir', 'Owner'
+
+    def __repr__(self):
+        return f'<Role {self.nama_role}>'
+
+class User(db.Model):
+    __tablename__ = 'datauser'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    # Ubah nama kolom agar lebih deskriptif
+    password_hash = db.Column(db.String(255), nullable=False) 
+
+    # Relasi Many-to-Many ke Role
+    roles = db.relationship('Role', secondary=user_roles, lazy='subquery',
+        backref=db.backref('users', lazy=True))
+
+    # Fungsi untuk mengubah password teks biasa menjadi hash
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    # Fungsi untuk mengecek kecocokan password
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+    
+# Tambahkan model ini untuk merekam jejak status
+class RiwayatStatusTransaksi(db.Model):
+    __tablename__ = 'datariwayatstatus'
+
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Kunci relasi ke Transaksi dan User
+    transaksi_id = db.Column(db.String(50), db.ForeignKey('datatransaksi.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('datauser.id'), nullable=False)
+    
+    # Merekam perubahan
+    status_sebelumnya = db.Column(db.Text)
+    status_baru = db.Column(db.Text, nullable=False)
+    
+    # Menggunakan datetime.now agar mencatat jam dan menit spesifik
+    waktu_perubahan = db.Column(db.DateTime, default=datetime.now)
+
+    # Relasi balik (Backref) agar mudah memanggil data dari tabel lain
+    user = db.relationship('User', backref=db.backref('riwayat_kerja', lazy=True))
+    # Relasi transaksi sudah ada di class Transaksi, tapi bisa ditambahkan relasi langsung di sini jika perlu
+    transaksi_rel = db.relationship('Transaksi', backref=db.backref('riwayat_status', lazy=True))
+
+    def __repr__(self):
+        return f'<Riwayat {self.transaksi_id}: {self.status_sebelumnya} -> {self.status_baru}>'

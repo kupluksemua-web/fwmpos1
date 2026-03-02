@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Rekap {{ nama_tahap }}</title>
+    <style>
+        @page { margin: 0; }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            color: #000;
+            width: 58mm;
+            margin: 0 auto;
+            padding: 10px 5px;
+            background-color: white;
+        }
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        
+        .header { border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 5px; }
+        .header h3 { margin: 0; font-size: 16px; }
+        .header p { margin: 2px 0; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+        table th, table td { padding: 4px 0; border-bottom: 1px dotted #000; vertical-align: top; }
+        
+        .footer { border-top: 1px dashed #000; padding-top: 5px; margin-top: 5px; font-weight: bold; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="header text-center">
+        <h3>FWM LAUNDRY</h3>
+        <p>REKAP TUGAS HARIAN</p>
+        <p>Bagian: <strong>{{ nama_tahap }}</strong></p>
+    </div>
+
+    <div class="text-left" style="margin-bottom: 10px;">
+        <p style="margin: 2px 0;">Tgl : {{ tanggal.strftime('%d-%m-%Y') }}</p>
+        <p style="margin: 2px 0;">Oleh: {{ username }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="text-left">Waktu</th>
+                <th class="text-left">Data Cucian</th>
+                <th class="text-right">Qty</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in riwayat %}
+            <tr>
+                <td class="text-left">{{ r.waktu_perubahan.strftime('%H:%M') }}</td>
+                <td class="text-left" style="font-size: 10px;">
+                    <strong>{{ r.transaksi_id }}</strong><br>
+                    {{ r.nama_pelanggan }}
+                </td>
+                <td class="text-right">{{ r.jumlah_item }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-center">Nihil / Belum ada data</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <div style="display: flex; justify-content: space-between;">
+            <span>TOTAL KERJA:</span>
+            <span>{{ total_semua_item }} item</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-weight: normal; font-size: 10px; margin-top: 2px;">
+            <span>(Dari {{ riwayat|length }} nota)</span>
+        </div>
+    </div>
+
+    <div class="text-center" style="margin-top: 15px; font-size: 10px;">
+        <p>Simpan struk ini sebagai</p>
+        <p>bukti penyelesaian tugas.</p>
+        <p>--- Terima Kasih ---</p>
+    </div>
+
+    <div class="text-center no-print" style="margin-top: 20px;">
+        <button onclick="window.print()" style="padding: 10px; font-weight: bold;">🖨️ Tekan untuk Cetak</button>
+        <br><br>
+        <button onclick="window.close()">Tutup Tab</button>
+    </div>
+
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
