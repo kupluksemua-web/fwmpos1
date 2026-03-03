@@ -8,6 +8,9 @@ def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./testdb.db'
     
+    # TAMBAHKAN BARIS INI (Ganti teks rahasianya dengan kata sandi acak milikmu)
+    app.config['SECRET_KEY'] = 'kunci_rahasia_fwm_laundry_123' 
+    
     db.init_app(app)
 
     from routes import register_routes

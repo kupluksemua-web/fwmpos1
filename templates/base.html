@@ -1,12 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Defult Value{% endblock %}</title>
+    <title>{% block title %}Default Value{% endblock %}</title>
+    
+    <style>
+        /* Desain sederhana untuk Bar Navigasi di Atas (TOP) */
+        .top-nav {
+            background-color: #007bff; /* Warna biru */
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 0 0 10px 10px; /* Sudut bawah membulat */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+        
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- TAMBAHAN UNTUK FOOTER DAN TOMBOL LOGOUT --- */
+        .footer {
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+            color: #555;
+        }
+
+        .btn-logout {
+            background-color: #dc3545; /* Warna merah agar jelas ini tombol keluar */
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .btn-logout:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
 <body>
-    <p>Ini Bakal selalu ada</p>
-    {% block content%}{% endblock %}
+    
+    <div class="top-nav">
+        <a href="{{ url_for('index') }}">🏠 FWM Laundry - Beranda</a>
+    </div>
+
+    <div style="padding: 0 20px; min-height: 70vh;">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div class="footer">
+        {% if session.get('user_id') %}
+            <p>Login sebagai: <strong>{{ session.get('username') }}</strong></p>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        {% else %}
+            <p>&copy; 2026 FWM Laundry</p>
+        {% endif %}
+    </div>
+
 </body>
 </html>

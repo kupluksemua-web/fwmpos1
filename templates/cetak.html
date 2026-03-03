@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk #{{ transaksi.id }}</title>
+    <title>Struk {{ transaksi.id }}</title>
     <style>
         /* Pengaturan khusus untuk Printer Thermal 58mm */
         @page {
@@ -11,13 +11,16 @@
         }
         
         body {
-            font-family: 'Courier New', Courier, monospace; /* Font struk kasir standar */
-            font-size: 12px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace; /* Font struk kasir standar, ditambah Consolas agar lebih tajam */
+            font-size: 13.2px; /* Diperbesar 10% dari 12px */
             color: #000;
             margin: 0;
             padding: 5px; 
             width: 58mm; /* Lebar kertas thermal */
             box-sizing: border-box;
+            /* Anti-aliasing agar font lebih tajam saat dirender browser */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Utility Classes */
@@ -33,20 +36,31 @@
 
         /* Penekanan untuk Karyawan */
         .nama-pelanggan {
-            font-size: 18px; /* Dibuat besar sesuai permintaan */
-            font-weight: bold;
+            font-size: 24px; /* Diperbesar signifikan dari 18px */
+            font-weight: 900; /* Font weight maksimal untuk ketajaman/ketebalan ekstra */
             text-transform: uppercase;
             margin: 5px 0;
+            letter-spacing: 0.5px; /* Sedikit jarak antar huruf agar tidak terlalu rapat saat dicetak tebal */
         }
         
         .tgl-selesai {
-            font-size: 14px;
+            font-size: 15.4px; /* Diperbesar 10% dari 14px */
             font-weight: bold;
             background-color: #000;
             color: #fff;
-            padding: 2px;
+            padding: 4px; /* Padding sedikit dilebarkan agar teks tidak menabrak kotak hitam */
             display: inline-block;
             margin-bottom: 5px;
+        }
+
+        /* TAMBAHAN: Styling untuk catatan unik */
+        .catatan-karyawan {
+            font-size: 14.3px; /* Diperbesar 10% dari 13px */
+            font-weight: bold;
+            border: 1px solid #000;
+            padding: 4px;
+            margin-bottom: 5px;
+            text-align: left;
         }
 
         /* Tabel Rincian */
@@ -76,23 +90,31 @@
         <div class="nama-pelanggan">{{ transaksi.pelanggan.nama_pelanggan }}</div>
         
         <div class="tgl-selesai">
-            SELESAI: {{ transaksi.waktu_selesai.strftime('%d-%m-%Y') }}
+            SELESAI: <br> 
+            {{ transaksi.waktu_selesai.strftime('%d-%m-%Y') }} 23:59
         </div>
     </div>
 
+    {% if transaksi.pelanggan.catatan_unik %}
+    <div class="catatan-karyawan">
+        CATATAN:<br>
+        {{ transaksi.pelanggan.catatan_unik }}
+    </div>
+    {% endif %}
+
     <div class="divider"></div>
-    <div>Nota: #{{ transaksi.id }}</div>
-    <div>Tgl Masuk: {{ transaksi.tanggal.strftime('%d-%m-%Y') }}</div>
+    <div>Nota: {{ transaksi.id }}</div>
+    <div>Masuk: {{ transaksi.tanggal.strftime('%d-%m-%Y') }} {{ transaksi.waktu.strftime('%H:%M') }}</div>
     <div class="divider"></div>
 
     <table>
         {% for detail in transaksi.detail_transaksi %}
         <tr>
-            <td colspan="2">{{ detail.produk.nama_produk }}</td>
+            <td colspan="2">- {{ detail.produk.nama_produk }}</td>
         </tr>
         <tr>
             <td style="padding-left: 10px;">{{ detail.kuantitas }} {{ detail.produk.satuan }}</td>
-            <td class="text-right">Rp {{ detail.total_harga_produk }}</td>
+            <td class="text-right">Rp {{ "{:,}".format(detail.total_harga_produk) }}</td>
         </tr>
         {% endfor %}
     </table>
@@ -101,8 +123,8 @@
     
     <table>
         <tr>
-            <td class="fw-bold" style="font-size: 14px;">TOTAL</td>
-            <td class="fw-bold text-right" style="font-size: 14px;">Rp {{ transaksi.total_harga_transaksi }}</td>
+            <td class="fw-bold" style="font-size: 15.4px;">TOTAL</td>
+            <td class="fw-bold text-right" style="font-size: 15.4px;">Rp {{ "{:,}".format(transaksi.total_harga_transaksi) }}</td>
         </tr>
     </table>
     

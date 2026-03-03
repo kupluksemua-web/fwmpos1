@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Nota - FWM Laundry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header h2 { margin: 0; color: #007bff; }
+        .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        .status-selesai { background-color: #d4edda; color: #155724; }
+        .status-proses { background-color: #fff3cd; color: #856404; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table th, table td { padding: 10px 0; border-bottom: 1px solid #eee; text-align: left; }
+        table th { color: #888; font-weight: normal; }
+        
+        .total-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .total-box h3 { margin: 5px 0 0 0; color: #28a745; }
+        .lunas { color: #28a745; font-weight: bold; }
+        .belum-lunas { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>FWM Laundry</h2>
+        <p>Detail Transaksi Anda</p>
+    </div>
+
+    <div>
+        <strong>Status Cucian Saat Ini:</strong><br>
+        <div class="status-badge {% if transaksi.status == 'Selesai' or transaksi.status == 'Siap Diambil' %}status-selesai{% else %}status-proses{% endif %}" style="margin-top: 5px;">
+            🕒 {{ transaksi.status }}
+        </div>
+    </div>
+
+    <p><strong>No. Nota:</strong> {{ transaksi.id }}</p>
+    <p><strong>Tgl Masuk:</strong> {{ transaksi.tanggal.strftime('%d-%m-%Y') }} {{ transaksi.waktu.strftime('%H:%M') }}</p>
+    <p><strong>Estimasi Selesai:</strong> {{ transaksi.waktu_selesai.strftime('%d-%m-%Y') }} 23:59</p>
+    <hr style="border: 1px dashed #ddd; margin: 20px 0;">
+
+    <h4 style="margin-bottom: 5px;">Rincian Pakaian:</h4>
+    <table>
+        <tbody>
+            {% for detail in transaksi.detail_transaksi %}
+            <tr>
+                <td>{{ detail.produk.nama_produk }}<br>
+                    <small style="color: gray;">{{ detail.kuantitas }} {{ detail.produk.satuan }} x Rp {{ detail.produk.harga }}</small>
+                </td>
+                <td style="text-align: right; font-weight: bold;">Rp {{ "{:,}".format(detail.total_harga_produk) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="total-box">
+    <p style="margin-top: 10px; font-size: 14px;">Status Pembayaran: 
+        {% if transaksi.status_pembayaran == 'Lunas' %}
+            <span class="lunas">✔ LUNAS</span>
+        {% else %}
+            <span class="belum-lunas">✖ BELUM BAYAR</span>
+        {% endif %}
+    </p>
+
+    <div style="background: #fee; padding: 10px; margin-top: 10px; border: 1px solid red; font-size: 12px; text-align: left;">
+        <strong>Debug Info:</strong><br>
+        Status Pembayaran: {{ transaksi.status_pembayaran }}<br>
+        Snap Token: {{ snap_token if snap_token else 'KOSONG (Gagal membuat token)' }}<br>
+        Client Key: {{ midtrans_client_key if midtrans_client_key else 'KOSONG' }}
+    </div>
+
+    {% if transaksi.status_pembayaran != 'Lunas' and snap_token %}
+    <button id="pay-button" style="width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 16px;">
+        💳 BAYAR SEKARANG
+    </button>
+    {% endif %}
+    </div>
+    
+    <p style="text-align: center; color: #888; font-size: 12px; margin-top: 25px;">
+        Simpan link ini untuk mengecek status cucian Anda sewaktu-waktu.
+    </p>
+</div>
+
+<script type="text/javascript"
+  src="https://app.sandbox.midtrans.com/snap/snap.js"
+  data-client-key="{{ midtrans_client_key }}"></script>
+
+<script type="text/javascript">
+    const payButton = document.getElementById('pay-button');
+    if (payButton) {
+        payButton.onclick = function () {
+            window.snap.pay('{{ snap_token }}', {
+                onSuccess: function(result) {
+                    location.reload();
+                },
+                onPending: function(result) {
+                    alert("Selesaikan pembayaran Anda!");
+                    location.reload();
+                }
+            });
+        };
+    }
+</script>
+
+</body>
+</html>

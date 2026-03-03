@@ -3,15 +3,40 @@
 
 {% block content %}
     <h1>Hello World</h1>
+    
     <a href="{{ url_for('tambahcustomer') }}">
         <button>Tambah Customer</button>
     </a><br><br>
+    
     <a href="{{ url_for('tambahtransaksi') }}">
         <button>Tambah Transaksi</button>
     </a><br><br>
+    
     <a href="{{ url_for('caricustomer') }}">
         <button>Cari Customer</button>
-    </a><br>
+    </a><br><br>
+    
+    <a href="{{ url_for('updatestatus') }}">
+        <button>Update Status</button>
+    </a><br><br>
+    
+    <a href="{{ url_for('profile') }}">
+        <button>Profile</button>
+    </a><br><br>
+
+    {% if session.get('user_roles') and 'Owner' in session.get('user_roles') %}
+    <a href="{{ url_for('dashboard') }}">
+        <button>Dashboard</button>
+    </a><br><br>
+    
+    <a href="{{ url_for('tambahuser') }}">
+        <button style="background-color: #ffc107; color: black; font-weight: bold;">+ Tambah Pegawai</button>
+    </a><br><br>
+
+    <a href="{{ url_for('kelolauser') }}">
+        <button style="background-color: #dc3545; color: white; font-weight: bold;">⚙️ Kelola / Reset Password</button>
+    </a><br><br>
+    {% endif %}
     
     <hr>
     
@@ -20,7 +45,7 @@
         {% for t in transaksi %}
             <li>
                 <strong>Nota #{{ t.id }}</strong> - 
-                {{ t.pelanggan.name }} - 
+                {{ t.pelanggan.nama_pelanggan }} - 
                 Rp {{ t.total_harga_transaksi }} 
                 <a href="{{ url_for('detailtransaksi', id=t.id) }}">[Lihat Detail]</a>
             </li>

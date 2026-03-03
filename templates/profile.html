@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Profil Pegawai - FWM Laundry{% endblock %}
+
+{% block content %}
+<style>
+    /* (CSS Tetap Sama Seperti Sebelumnya) */
+    .profile-header { background-color: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 5px solid #007bff; margin-bottom: 30px; }
+    .section-title { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-top: 30px; }
+    .btn-print { background-color: #17a2b8; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; font-size: 0.9em; }
+    .btn-print:hover { background-color: #138496; }
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .history-table th, .history-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    .history-table th { background-color: #f2f2f2; }
+</style>
+
+<div class="profile-header">
+    <h2>Profil Pegawai</h2>
+    <p><strong>Username:</strong> {{ session.get('username') }}</p>
+    <p><strong>Peran (Role):</strong> {{ session.get('user_roles') | join(', ') }}</p>
+</div>
+
+<h3>Rekam Jejak Pekerjaan Hari Ini</h3>
+
+<div class="section-title">
+    <h4>Tugas Selesai: Tahap Cuci</h4>
+    <a href="{{ url_for('cetak_rekap', tahap='cuci') }}" target="_blank" class="btn-print">🖨️ Cetak Rekap Cuci</a>
+</div>
+<table class="history-table">
+    <thead>
+        <tr>
+            <th>Waktu Selesai</th>
+            <th>No. Nota</th>
+            <th>Pelanggan</th>
+            <th>Total Item</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rc in rekap_cuci %}
+        <tr>
+            <td>{{ rc.waktu_perubahan.strftime('%H:%M:%S') }}</td>
+            <td><strong>{{ rc.transaksi_id }}</strong></td>
+            <td>{{ rc.nama_pelanggan }}</td>
+            <td>{{ rc.jumlah_item }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" style="text-align: center; color: gray;">Belum ada tugas cuci yang diselesaikan hari ini.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="section-title">
+    <h4>Tugas Selesai: Tahap Setrika</h4>
+    <a href="{{ url_for('cetak_rekap', tahap='setrika') }}" target="_blank" class="btn-print">🖨️ Cetak Rekap Setrika</a>
+</div>
+<table class="history-table">
+    <thead>
+        <tr>
+            <th>Waktu Selesai</th>
+            <th>No. Nota</th>
+            <th>Pelanggan</th>
+            <th>Total Item</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rs in rekap_setrika %}
+        <tr>
+            <td>{{ rs.waktu_perubahan.strftime('%H:%M:%S') }}</td>
+            <td><strong>{{ rs.transaksi_id }}</strong></td>
+            <td>{{ rs.nama_pelanggan }}</td>
+            <td>{{ rs.jumlah_item }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" style="text-align: center; color: gray;">Belum ada tugas setrika yang diselesaikan hari ini.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="section-title">
+    <h4>Tugas Selesai: Tahap Packing</h4>
+    <a href="{{ url_for('cetak_rekap', tahap='packing') }}" target="_blank" class="btn-print">🖨️ Cetak Rekap Packing</a>
+</div>
+<table class="history-table">
+    <thead>
+        <tr>
+            <th>Waktu Selesai</th>
+            <th>No. Nota</th>
+            <th>Pelanggan</th>
+            <th>Total Item</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rp in rekap_packing %}
+        <tr>
+            <td>{{ rp.waktu_perubahan.strftime('%H:%M:%S') }}</td>
+            <td><strong>{{ rp.transaksi_id }}</strong></td>
+            <td>{{ rp.nama_pelanggan }}</td>
+            <td>{{ rp.jumlah_item }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" style="text-align: center; color: gray;">Belum ada tugas packing yang diselesaikan hari ini.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

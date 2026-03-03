@@ -2,11 +2,45 @@
 {% block title %}Tambah Transaksi{% endblock %}
 
 {% block content %}
+<style>
+    /* Styling untuk daftar produk yang bisa di-scroll */
+    .product-list {
+        max-height: 200px; /* Batas tinggi list sebelum bisa di-scroll */
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+    .product-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s;
+    }
+    .product-item:hover {
+        background-color: #f8f9fa;
+    }
+    .product-item.selected {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+    .search-box {
+        width: 100%;
+        max-width: 400px;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+</style>
+
     <h1>Tambah Transaksi</h1>
     <hr>
     
     <h3>1. Pilih Pelanggan</h3>
-    <select id="pilihPelanggan">
+    <select id="pilihPelanggan" style="padding: 8px; width: 100%; max-width: 400px; border-radius: 5px;">
         <option value="" disabled selected>-- Pilih Pelanggan --</option>
         {% for p in pelanggan %}
             <option value="{{ p.id }}">{{ p.nama_pelanggan }} - {{ p.nomor_telepon }}</option>
@@ -15,16 +49,28 @@
     <hr>
 
     <h3>2. Tambah Produk</h3>
-    <select id="pilihProduk">
-        <option value="" disabled selected>-- Pilih Produk --</option>
+    <input type="text" id="cariProduk" class="search-box" placeholder="🔍 Cari nama produk..." onkeyup="filterProduk()">
+
+    <div class="product-list" id="wadahProduk">
         {% for pr in produk %}
-            <option value="{{ pr.id }}" data-nama="{{ pr.nama_produk }}" data-harga="{{ pr.harga }}">
+            <div class="product-item" onclick="pilihProduk(this, '{{ pr.id }}', '{{ pr.nama_produk }}', {{ pr.harga }})">
                 {{ pr.nama_produk }} - Rp{{ pr.harga }}
-            </option>
+            </div>
         {% endfor %}
-    </select>
-    <input type="number" id="jumlahProduk" placeholder="Jumlah" min="1">
-    <button type="button" onclick="tambahKeKeranjang()">Tambah ke List</button>
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        Terpilih: <strong id="labelProdukTerpilih" style="color: #007bff;">Belum ada</strong>
+    </div>
+
+    <input type="hidden" id="hiddenProdukId">
+    <input type="hidden" id="hiddenProdukNama">
+    <input type="hidden" id="hiddenProdukHarga">
+
+    <input type="number" id="jumlahProduk" placeholder="Jumlah" min="0.1" step="0.01" style="padding: 8px; border-radius: 5px;">
+    <button type="button" onclick="tambahKeKeranjang()" style="padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Tambah ke List
+    </button>
     <hr>
 
     <h3>3. Produk yang dipilih</h3>
@@ -32,35 +78,69 @@
         </ul>
     <hr>
 
-    <label>Total Belanja: Rp <span id="labelTotal">0</span></label><br>
-    <label>Diskon: Rp </label>
-    <input type="number" id="inputDiskon" value="0" min="0" oninput="hitungTotalAkhir()"><br>
-    <label><strong>Total Akhir: Rp <span id="labelTotalAkhir">0</span></strong></label><br><br>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; max-width: 400px;">
+        <label>Total Belanja: Rp <span id="labelTotal">0</span></label><br>
+        <label style="margin-top: 10px; display: inline-block;">Diskon: Rp </label>
+        <input type="number" id="inputDiskon" value="0" min="0" oninput="hitungTotalAkhir()" style="padding: 5px; border-radius: 5px; width: 100px;"><br><br>
+        <label style="font-size: 1.2em;"><strong>Total Akhir: Rp <span id="labelTotalAkhir" style="color: #dc3545;">0</span></strong></label>
+    </div>
+    <br>
 
-    <button type="button" onclick="buatTransaksi()">Buat Transaksi</button>
+    <button type="button" onclick="buatTransaksi()" style="padding: 12px 20px; font-size: 1.1em; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Buat Transaksi
+    </button>
 
     <script>
-        // Array untuk menyimpan data barang sementara
         let keranjang = [];
         let totalBelanja = 0;
 
-        function tambahKeKeranjang() {
-            const dropdownProduk = document.getElementById('pilihProduk');
-            const opsiTerpilih = dropdownProduk.options[dropdownProduk.selectedIndex];
-            const jumlah = parseInt(document.getElementById('jumlahProduk').value);
+        // --- FUNGSI PENCARIAN PRODUK ---
+        function filterProduk() {
+            let input = document.getElementById('cariProduk').value.toLowerCase();
+            let items = document.getElementsByClassName('product-item');
 
-            // Validasi jika belum pilih produk atau jumlah kosong
-            if (opsiTerpilih.value === "" || isNaN(jumlah) || jumlah <= 0) {
-                alert("Pilih produk dan masukkan jumlah yang benar!");
-                return;
+            for (let i = 0; i < items.length; i++) {
+                let txtValue = items[i].textContent || items[i].innerText;
+                if (txtValue.toLowerCase().indexOf(input) > -1) {
+                    items[i].style.display = ""; // Tampilkan jika cocok
+                } else {
+                    items[i].style.display = "none"; // Sembunyikan jika tidak cocok
+                }
+            }
+        }
+
+        // --- FUNGSI MEMILIH PRODUK DARI LIST ---
+        function pilihProduk(element, id, nama, harga) {
+            // Hapus efek warna dari semua item terlebih dahulu
+            let items = document.getElementsByClassName('product-item');
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('selected');
             }
 
-            // Ambil data dari tag option
-            const produkId = opsiTerpilih.value;
-            const namaProduk = opsiTerpilih.getAttribute('data-nama');
-            const harga = parseInt(opsiTerpilih.getAttribute('data-harga'));
+            // Tambahkan efek warna biru ke item yang baru saja diklik
+            element.classList.add('selected');
+
+            // Update teks agar kasir tahu apa yang dipilih
+            document.getElementById('labelProdukTerpilih').innerText = nama + " (Rp" + harga + ")";
+
+            // Simpan datanya ke dalam form tersembunyi
+            document.getElementById('hiddenProdukId').value = id;
+            document.getElementById('hiddenProdukNama').value = nama;
+            document.getElementById('hiddenProdukHarga').value = harga;
+        }
+
+        function tambahKeKeranjang() {
+            // Ambil data dari input tersembunyi (bukan dari select dropdown lagi)
+            const produkId = document.getElementById('hiddenProdukId').value;
+            const namaProduk = document.getElementById('hiddenProdukNama').value;
+            const harga = parseInt(document.getElementById('hiddenProdukHarga').value);
+            const jumlah = parseFloat(document.getElementById('jumlahProduk').value);
+
+            if (produkId === "" || isNaN(jumlah) || jumlah <= 0) {
+                alert("Pilih produk dari daftar dan masukkan jumlah yang benar!");
+                return;
+            }
             
-            // Masukkan ke array keranjang
             keranjang.push({
                 produk_id: produkId,
                 nama: namaProduk,
@@ -68,22 +148,44 @@
                 jumlah: jumlah
             });
 
+            // --- RESET TAMPILAN SETELAH DITAMBAH ---
+            document.getElementById('jumlahProduk').value = '';
+            document.getElementById('hiddenProdukId').value = '';
+            document.getElementById('hiddenProdukNama').value = '';
+            document.getElementById('hiddenProdukHarga').value = '';
+            document.getElementById('labelProdukTerpilih').innerText = 'Belum ada';
+            document.getElementById('cariProduk').value = ''; // Kosongkan pencarian
+            
+            // Hapus efek terpilih dan munculkan lagi semua produk di daftar
+            let items = document.getElementsByClassName('product-item');
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('selected');
+                items[i].style.display = ""; 
+            }
+            
+            tampilkanKeranjang();
+        }
+
+        function hapusDariKeranjang(index) {
+            keranjang.splice(index, 1);
             tampilkanKeranjang();
         }
 
         function tampilkanKeranjang() {
             const list = document.getElementById('listKeranjang');
-            list.innerHTML = ''; // Kosongkan list HTML
-            totalBelanja = 0;    // Reset hitungan
+            list.innerHTML = ''; 
+            totalBelanja = 0;    
 
-            // Looping isi array keranjang
             keranjang.forEach((item, index) => {
                 const subtotal = item.harga * item.jumlah;
                 totalBelanja += subtotal;
 
-                // Buat elemen <li> baru
                 const li = document.createElement('li');
-                li.innerHTML = `${item.nama} - Rp${item.harga} x ${item.jumlah} = Rp${subtotal}`;
+                li.style.marginBottom = "5px";
+                li.innerHTML = `
+                    ${item.nama} - Rp${item.harga} x ${item.jumlah} = Rp${subtotal}
+                    <button type="button" onclick="hapusDariKeranjang(${index})" style="margin-left: 10px; color: white; background-color: #dc3545; border: none; border-radius: 3px; padding: 2px 5px; cursor: pointer;">X</button>
+                `;
                 list.appendChild(li);
             });
 
@@ -97,14 +199,13 @@
             if(isNaN(diskon)) diskon = 0;
 
             const totalAkhir = totalBelanja - diskon;
-            document.getElementById('labelTotalAkhir').innerText = totalAkhir;
+            document.getElementById('labelTotalAkhir').innerText = totalAkhir > 0 ? totalAkhir : 0;
         }
 
         async function buatTransaksi() {
             const pelangganId = document.getElementById('pilihPelanggan').value;
-            const diskon = document.getElementById('inputDiskon').value;
+            const diskon = document.getElementById('inputDiskon').value || 0;
 
-            // Validasi sebelum kirim ke database
             if (pelangganId === "") {
                 alert("Pilih pelanggan terlebih dahulu!");
                 return;
@@ -114,14 +215,12 @@
                 return;
             }
 
-            // Kemas data menjadi format JSON
             const dataKirim = {
                 pelanggan_id: pelangganId,
                 diskon: diskon,
                 keranjang: keranjang
             };
 
-            // Kirim ke rute Python menggunakan Fetch API
             const response = await fetch('/tambahtransaksi', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -130,10 +229,11 @@
 
             const hasil = await response.json();
             
-            // Jika sukses, pindah halaman sesuai URL dari Python
             if (hasil.status === 'success') {
                 alert("Transaksi Berhasil Dibuat!");
                 window.location.href = hasil.redirect_url;
+            } else {
+                alert("Terjadi kesalahan: " + (hasil.message || "Gagal membuat transaksi."));
             }
         }
     </script>

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Laporan Keuangan{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .dashboard-header {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .filter-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .filter-box input[type="date"] {
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .filter-box button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 6px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .filter-box button:hover {
+        background-color: #0056b3;
+    }
+
+    .kpi-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .kpi-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+    }
+    
+    .kpi-card h4 {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+    
+    .kpi-card .value {
+        font-size: 26px;
+        font-weight: bold;
+        margin: 10px 0 0 0;
+        color: #333;
+    }
+
+    .kpi-blue { border-left: 5px solid #007bff; }
+    .kpi-green { border-left: 5px solid #28a745; }
+    .kpi-red { border-left: 5px solid #dc3545; }
+
+    .chart-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="dashboard-header">
+    <div>
+        <h2>Laporan Keuangan FWM Laundry</h2>
+        <p>Menampilkan performa dari <strong>{{ start_date.strftime('%d-%m-%Y') }}</strong> hingga <strong>{{ end_date.strftime('%d-%m-%Y') }}</strong></p>
+    </div>
+    
+    <form method="GET" action="{{ url_for('dashboard') }}" class="filter-box">
+        <label>Dari:</label>
+        <input type="date" name="start_date" value="{{ start_date }}" required>
+        
+        <label>Sampai:</label>
+        <input type="date" name="end_date" value="{{ end_date }}" required>
+        
+        <button type="submit">Filter Data</button>
+    </form>
+</div>
+
+<div class="kpi-container">
+    <div class="kpi-card kpi-blue">
+        <h4>Total Omset (Semua Nota)</h4>
+        <p class="value">Rp {{ "{:,}".format(total_omset) }}</p>
+    </div>
+    <div class="kpi-card kpi-green">
+        <h4>Pendapatan Masuk (Lunas)</h4>
+        <p class="value">Rp {{ "{:,}".format(pendapatan_lunas) }}</p>
+    </div>
+    <div class="kpi-card kpi-red">
+        <h4>Piutang (Belum Dibayar)</h4>
+        <p class="value">Rp {{ "{:,}".format(piutang) }}</p>
+    </div>
+</div>
+
+<div class="chart-container">
+    <h3>Tren Omset vs Pendapatan Harian</h3>
+    <canvas id="revenueChart" height="100"></canvas>
+</div>
+
+<script>
+    const labelHari = {{ label_hari | tojson }};
+    const dataOmset = {{ data_omset | tojson }};
+    const dataPendapatan = {{ data_pendapatan | tojson }};
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labelHari,
+            datasets: [
+                {
+                    label: 'Total Omset (Semua Nota)',
+                    data: dataOmset,
+                    backgroundColor: 'rgba(0, 123, 255, 0.5)', /* Warna Biru Transparan */
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Uang Masuk (Lunas)',
+                    data: dataPendapatan,
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)', /* Warna Hijau Solid */
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

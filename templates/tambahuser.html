@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Tambah Pegawai Baru - FWM Laundry{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 500px;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-top: 20px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 5px;
+    }
+    .checkbox-item {
+        background: white;
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+    .checkbox-item:hover {
+        background: #e9ecef;
+    }
+    .btn-submit {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        width: 100%;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    .btn-submit:hover {
+        background-color: #218838;
+    }
+</style>
+
+<h2>Tambah Pegawai Baru</h2>
+<p>Daftarkan akun kasir, admin, atau bagian operasional lainnya di sini.</p>
+
+<div class="form-container">
+    <form method="POST" action="{{ url_for('tambahuser') }}">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required placeholder="Contoh: kasir_budi">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required placeholder="Masukkan kata sandi rahasia">
+        </div>
+        
+        <div class="form-group">
+            <label>Pilih Peran Pekerjaan (Role):</label>
+            <p style="font-size: 12px; color: gray; margin-top: 0; margin-bottom: 10px;">Anda dapat mencentang lebih dari satu peran.</p>
+            <div class="checkbox-group">
+                {% for role in daftar_role %}
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="roles" value="{{ role.id }}">
+                        {{ role.nama_role }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-submit">💾 Simpan Akun Pegawai</button>
+    </form>
+</div>
+<br>
+<a href="{{ url_for('index') }}">
+    <button type="button">Kembali ke Beranda</button>
+</a>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Login - FWM Laundry{% endblock %}
+
+{% block content %}
+    <h2>Login Pegawai FWM Laundry</h2>
+    
+    <form method="POST" action="{{ url_for('login') }}">
+        <div>
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required placeholder="Masukkan Username">
+        </div>
+        <br>
+        <div>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required placeholder="Masukkan Password">
+        </div>
+        <br>
+        <button type="submit">Masuk</button>
+    </form>
+{% endblock %}
