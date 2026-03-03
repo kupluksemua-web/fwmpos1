@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+{% block title %}Update Status Transaksi{% endblock %}
+
+{% block content %}
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-blue: #0072BC;
+        --fwm-red: #ED1C24;
+        --bg-light: #F8FAFB;
+        --text-dark: #1A202C;
+        --text-muted: #718096;
+        --border-color: #E2E8F0;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 24px 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+        box-sizing: border-box;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: var(--fwm-blue);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: opacity 0.2s;
+    }
+    .btn-back:active { opacity: 0.6; }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    /* Styling Jam Real-time */
+    .clock-widget {
+        background: linear-gradient(135deg, var(--fwm-blue), #005A96);
+        color: white;
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0, 114, 188, 0.2);
+    }
+    
+    .clock-time {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        line-height: 1;
+        margin-bottom: 4px;
+        font-variant-numeric: tabular-nums;
+    }
+    
+    .clock-date {
+        font-size: 13px;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    /* Styling Menu Filter (Tab Status) */
+    .status-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .status-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .tab-btn {
+        padding: 10px 18px;
+        border: 1.5px solid var(--border-color);
+        background-color: white;
+        color: var(--text-muted);
+        border-radius: 25px;
+        cursor: pointer;
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    
+    .tab-btn.active {
+        background-color: var(--fwm-blue);
+        color: white;
+        border-color: var(--fwm-blue);
+        box-shadow: 0 4px 10px rgba(0, 114, 188, 0.2);
+    }
+
+    /* Styling Kartu Transaksi */
+    .trx-card {
+        background-color: white;
+        border: 1px solid rgba(0,0,0,0.02);
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 16px;
+        box-shadow: var(--card-shadow);
+        transition: transform 0.2s;
+    }
+
+    .trx-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #F1F5F9;
+        padding-bottom: 12px;
+    }
+
+    .trx-name-group {
+        display: flex;
+        flex-direction: column;
+        max-width: 50%;
+    }
+
+    .trx-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+        word-wrap: break-word;
+    }
+
+    .trx-id {
+        font-size: 12px;
+        color: var(--fwm-blue);
+        font-weight: 600;
+        background: rgba(0, 114, 188, 0.08);
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        align-self: flex-start;
+    }
+
+    /* Peringatan Tenggat Waktu */
+    .trx-deadline-compact {
+        background-color: #FFF5F5;
+        border: 1px solid #FED7D7;
+        color: var(--fwm-red);
+        padding: 6px 10px;
+        border-radius: 8px;
+        text-align: right;
+        max-width: 48%; 
+    }
+    
+    .deadline-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #C53030;
+        margin-bottom: 2px;
+    }
+    
+    .deadline-time {
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .trx-date {
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        background: #F8FAFC;
+        padding: 10px 12px;
+        border-radius: 8px;
+    }
+
+    /* Styling Swipe to Update Premium */
+    .swipe-container {
+        position: relative;
+        height: 54px;
+        background-color: #EDF2F7;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        user-select: none;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .swipe-text {
+        color: #4A5568;
+        font-weight: 700;
+        font-size: 13px;
+        z-index: 1;
+        pointer-events: none;
+        letter-spacing: 0.5px;
+    }
+    .swipe-btn {
+        position: absolute;
+        left: 4px;
+        top: 4px;
+        width: 46px;
+        height: 46px;
+        background-color: white;
+        border-radius: 50%;
+        color: var(--fwm-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        z-index: 2;
+        font-size: 18px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        transition: transform 0.1s;
+    }
+    .swipe-btn:active {
+        cursor: grabbing;
+        background-color: #f9f9f9;
+    }
+    .swipe-progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--fwm-green), #A3D95D);
+        z-index: 0;
+        border-radius: 30px 0 0 30px;
+    }
+
+    .done-badge {
+        text-align: center;
+        color: #22543D;
+        font-weight: 700;
+        background: #F0FFF4;
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        border: 1px solid #C6F6D5;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 30px 0;
+        color: var(--text-muted);
+        font-size: 14px;
+        background: white;
+        border-radius: 16px;
+        border: 1px dashed var(--border-color);
+    }
+</style>
+
+<div class="mobile-container">
+    <a href="{{ url_for('index') }}" class="btn-back">
+        <span style="font-size: 18px; margin-right: 5px;">&larr;</span> Beranda
+    </a>
+
+    <div class="page-header">
+        <h1 class="page-title">Update Status</h1>
+    </div>
+
+    <div class="clock-widget">
+        <div class="clock-time" id="live-time">00:00:00</div>
+        <div class="clock-date" id="live-date">Memuat tanggal...</div>
+    </div>
+
+    <div class="status-tabs">
+        <button class="tab-btn active" onclick="filterStatus('Antri Cuci')">Antri Cuci</button>
+        <button class="tab-btn" onclick="filterStatus('Antri Setrika')">Antri Setrika</button>
+        <button class="tab-btn" onclick="filterStatus('Antri Packing')">Antri Packing</button>
+        <button class="tab-btn" onclick="filterStatus('Siap Diambil')">Siap Diambil</button>
+        <button class="tab-btn" onclick="filterStatus('Selesai')">Selesai</button>
+    </div>
+
+    <div id="list-transaksi">
+        {% for t in transaksi %}
+            {% set safe_id = t.id.replace('/', '-') %}
+
+            <div class="trx-card" data-status="{{ t.status }}" style="display: {% if t.status == 'Antri Cuci' or t.status == 'Menunggu' %}block{% else %}none{% endif %};">
+                
+                <div class="trx-header">
+                    <div class="trx-name-group">
+                        <span class="trx-name">{{ t.pelanggan.nama_pelanggan }}</span>
+                        <span class="trx-id">{{ t.id }}</span>
+                    </div>
+
+                    <div class="trx-deadline-compact">
+                        <div class="deadline-title">Target Selesai</div>
+                        <div class="deadline-time">{{ t.waktu_selesai.strftime('%d %b %y') }}</div>
+                    </div>
+                </div>
+                
+                <div class="trx-date">
+                    <span><strong>Masuk:</strong> {{ t.tanggal.strftime('%d %b %Y') }}</span>
+                    <span><strong>Jam:</strong> {{ t.waktu.strftime('%H:%M') }}</span>
+                </div>
+                
+                {% if t.status != 'Selesai' %}
+                <div class="swipe-container" id="container-{{ safe_id }}">
+                    <div class="swipe-progress" id="progress-{{ safe_id }}"></div>
+                    <div class="swipe-text" id="text-{{ safe_id }}">Geser ke Tahap Selanjutnya ➔</div>
+                    <div class="swipe-btn" id="btn-{{ safe_id }}" 
+                         onmousedown="startSwipe(event, '{{ safe_id }}', '{{ t.id }}')" 
+                         ontouchstart="startSwipe(event, '{{ safe_id }}', '{{ t.id }}')">❯❯</div>
+                </div>
+                {% else %}
+                <div class="done-badge">
+                    Transaksi Selesai & Diambil
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                Belum ada transaksi di sistem.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // --- FUNGSI JAM REAL-TIME ---
+    function updateClock() {
+        const now = new Date();
+        const optionsTime = { timeZone: 'Asia/Jakarta', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const optionsDate = { timeZone: 'Asia/Jakarta', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        
+        const timeString = now.toLocaleTimeString('id-ID', optionsTime);
+        const dateString = now.toLocaleDateString('id-ID', optionsDate);
+        
+        document.getElementById('live-time').innerText = timeString.replace(/\./g, ':');
+        document.getElementById('live-date').innerText = dateString;
+    }
+    
+    setInterval(updateClock, 1000);
+    updateClock(); 
+
+    // --- FUNGSI UNTUK TAB FILTER STATUS ---
+    function filterStatus(status) {
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            if(btn.innerText === status) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        const cards = document.querySelectorAll('.trx-card');
+
+        cards.forEach(card => {
+            if (status === 'Antri Cuci' && (card.getAttribute('data-status') === 'Antri Cuci' || card.getAttribute('data-status') === 'Menunggu')) {
+                card.style.display = 'block';
+            } 
+            else if (card.getAttribute('data-status') === status) {
+                card.style.display = 'block';
+            } 
+            else {
+                card.style.display = 'none';
+            }
+        });
+
+        // SIMPAN TAB TERAKHIR KE MEMORI BROWSER
+        localStorage.setItem('tabStatusTerakhir', status);
+    }
+
+    // MEMUAT TAB TERAKHIR SAAT HALAMAN DI-REFRESH
+    document.addEventListener("DOMContentLoaded", function() {
+        // Ambil tab terakhir dari memori, jika tidak ada, gunakan 'Antri Cuci'
+        const tabTersimpan = localStorage.getItem('tabStatusTerakhir') || 'Antri Cuci';
+        filterStatus(tabTersimpan);
+    });
+
+    // --- LOGIKA SWIPE TO UPDATE ---
+    let isDragging = false;
+    let currentBtn = null;
+    let startX = 0;
+    let maxTranslate = 0;
+    let currentSafeId = null;
+    let currentRealId = null; 
+
+    function startSwipe(e, safeId, realId) {
+        isDragging = true;
+        currentSafeId = safeId;
+        currentRealId = realId;
+        
+        currentBtn = document.getElementById(`btn-${safeId}`);
+        startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        
+        const container = document.getElementById(`container-${safeId}`);
+        maxTranslate = container.clientWidth - currentBtn.clientWidth - 8; 
+        
+        currentBtn.style.transition = 'none';
+        document.getElementById(`text-${safeId}`).style.opacity = '0.3'; 
+    }
+
+    document.addEventListener('mousemove', moveSwipe);
+    document.addEventListener('touchmove', moveSwipe);
+
+    function moveSwipe(e) {
+        if (!isDragging || !currentBtn) return;
+        
+        const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        let moveX = currentX - startX;
+
+        if (moveX < 0) moveX = 0;
+        if (moveX > maxTranslate) moveX = maxTranslate;
+
+        currentBtn.style.transform = `translateX(${moveX}px)`;
+        document.getElementById(`progress-${currentSafeId}`).style.width = `${moveX + 26}px`; 
+    }
+
+    document.addEventListener('mouseup', endSwipe);
+    document.addEventListener('touchend', endSwipe);
+
+    function endSwipe() {
+        if (!isDragging || !currentBtn) return;
+        isDragging = false;
+
+        const currentTransform = currentBtn.style.transform;
+        const moveX = parseFloat(currentTransform.replace('translateX(', '').replace('px)', '')) || 0;
+
+        if (moveX >= maxTranslate - 5) {
+            currentBtn.style.transform = `translateX(${maxTranslate}px)`;
+            currentBtn.style.color = "white";
+            currentBtn.style.backgroundColor = "transparent";
+            currentBtn.style.boxShadow = "none";
+            currentBtn.innerHTML = "OK"; 
+            
+            const textEl = document.getElementById(`text-${currentSafeId}`);
+            textEl.style.opacity = '1';
+            textEl.style.color = 'white';
+            textEl.innerText = "Memproses...";
+            
+            fetch('/updatestatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trx_id: currentRealId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    textEl.innerText = "Status Diperbarui!";
+                    setTimeout(() => { location.reload(); }, 500);
+                } else {
+                    alert("Error: " + data.message);
+                    resetSwipe();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resetSwipe();
+            });
+
+        } else {
+            resetSwipe();
+        }
+        
+        currentBtn = null;
+    }
+
+    function resetSwipe() {
+        if(!currentBtn) return;
+        currentBtn.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        currentBtn.style.transform = `translateX(0px)`;
+        document.getElementById(`progress-${currentSafeId}`).style.width = '0px';
+        document.getElementById(`text-${currentSafeId}`).style.opacity = '1';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Login - FWM Laundry{% endblock %}
+
+{% block content %}
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --fwm-blue: #0072BC;
+        --fwm-green: #8CC63F;
+        --bg-light: #F8FAFB;
+        --text-dark: #1A202C;
+        --text-muted: #718096;
+        --border-color: #E2E8F0;
+    }
+
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 400px;
+        margin: 40px auto;
+        padding: 0 20px;
+        box-sizing: border-box;
+    }
+
+    /* Styling Kartu Login */
+    .login-card {
+        background: white;
+        padding: 32px 24px;
+        border-radius: 24px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.02);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .login-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 6px;
+        font-weight: 500;
+    }
+
+    /* Styling Form Input */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+        margin-left: 4px;
+    }
+
+    .input-control {
+        width: 100%;
+        font-family: 'Poppins', sans-serif;
+        padding: 14px 16px;
+        font-size: 14px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 12px;
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    .input-control:focus {
+        outline: none;
+        border-color: var(--fwm-blue);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(0, 114, 188, 0.1);
+    }
+
+    /* Tombol Masuk Premium */
+    .btn-login {
+        width: 100%;
+        background-color: var(--fwm-blue);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 12px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 10px;
+        box-shadow: 0 4px 12px rgba(0, 114, 188, 0.2);
+    }
+
+    .btn-login:active {
+        transform: scale(0.97);
+        opacity: 0.9;
+    }
+
+    /* Link tambahan atau footer login */
+    .login-footer {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+</style>
+
+<div class="mobile-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2 class="login-title">Login Pegawai</h2>
+            <p class="login-subtitle">Silakan masuk ke sistem POS FWM Laundry</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="input-control" required placeholder="Masukkan username Anda" autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="input-control" required placeholder="Masukkan password Anda" autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn-login">Masuk Sekarang</button>
+        </form>
+    </div>
+
+    <div class="login-footer">
+        &copy; 2026 FWM Laundry POS System v1.0
+    </div>
+</div>
+{% endblock %}

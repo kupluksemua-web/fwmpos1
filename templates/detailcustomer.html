@@ -2,46 +2,240 @@
 {% block title %}Detail Customer{% endblock %}
 
 {% block content %}
-    <h1>Detail Customer</h1><br>
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-blue: #0072BC;
+        --fwm-red: #ED1C24;
+        --bg-light: #F8FAFB;
+        --text-dark: #1A202C;
+        --text-muted: #718096;
+        --border-color: #E2E8F0;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 24px 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+        box-sizing: border-box;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: var(--fwm-blue);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: opacity 0.2s;
+    }
     
-    <p><strong>Nama :</strong> {{ pelanggan.nama_pelanggan }}</p>
-    <p><strong>Nomor Telepon :</strong> {{ pelanggan.nomor_telepon }}</p>
-    <p><strong>Alamat :</strong> {{ pelanggan.alamat }}</p>
-    <p><strong>Catatan :</strong> {{ pelanggan.catatan_unik }}</p>
+    .btn-back:active { opacity: 0.6; }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    /* Layout Kartu Informasi */
+    .info-card {
+        background: white;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 20px;
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .card-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-dark);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between; /* Untuk memisahkan Judul dan Tombol Edit */
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 12px;
+    }
+
+    /* Tombol Edit Profil Kecil di Header Kartu */
+    .btn-edit-sm {
+        background-color: #FEF3C7;
+        color: #D97706; /* Warna Oranye Premium */
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 12px;
+        text-transform: none;
+        letter-spacing: 0;
+        transition: transform 0.1s;
+    }
+    .btn-edit-sm:active { transform: scale(0.95); }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .info-label { color: var(--text-muted); font-weight: 400; width: 40%; }
+    .info-value { font-weight: 600; text-align: right; color: var(--text-dark); width: 60%; word-wrap: break-word; }
+
+    /* List Riwayat Transaksi (Pengganti Table) */
+    .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .history-card {
+        display: block;
+        text-decoration: none;
+        border: 1px solid var(--border-color);
+        padding: 16px;
+        border-radius: 16px;
+        background-color: #FAFCFF;
+        transition: all 0.2s ease;
+    }
+
+    .history-card:active {
+        background-color: #F1F5F9;
+        border-color: var(--fwm-blue);
+        transform: scale(0.98);
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .nota-id { 
+        font-weight: 800; 
+        color: var(--fwm-blue); 
+        font-size: 15px; 
+    }
     
-    <hr>
-    <h1>Daftar Transaksi</h1>
+    .badge-status {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        background-color: #E2E8F0; /* Abu-abu netral */
+        color: #4A5568;
+    }
+
+    .history-detail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .history-price {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 14px;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 13px;
+        padding: 24px 0;
+        background-color: #F8FAFC;
+        border-radius: 12px;
+        border: 1px dashed var(--border-color);
+    }
+</style>
+
+<div class="mobile-container">
+    <a href="{{ url_for('index') }}" class="btn-back">
+        <span style="font-size: 18px; margin-right: 5px;">&larr;</span> Kembali ke Beranda
+    </a>
     
-    <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th>ID Nota</th>
-                <th>Tanggal & Waktu</th>
-                <th>Total Belanja</th>
-                <th>Status</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="page-header">
+        <h1 class="page-title">Detail Customer</h1>
+    </div>
+
+    <div class="info-card">
+        <div class="card-title">
+            <span>👤 Profil Pelanggan</span>
+            <a href="{{ url_for('editcustomer', id=pelanggan.id) }}" class="btn-edit-sm">✏️ Edit Profil</a>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Nama</span>
+            <span class="info-value">{{ pelanggan.nama_pelanggan }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">No. Telepon</span>
+            <span class="info-value">
+                {{ pelanggan.nomor_telepon }}
+                <a href="https://wa.me/{{ pelanggan.nomor_telepon | replace('0', '62', 1) }}" target="_blank" style="text-decoration:none; margin-left:6px;">💬</a>
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Alamat</span>
+            <span class="info-value">{{ pelanggan.alamat }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Catatan</span>
+            <span class="info-value" style="color: var(--fwm-red);">{{ pelanggan.catatan_unik }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Bergabung</span>
+            <span class="info-value">{{ pelanggan.tanggal_input.strftime('%d %B %Y') if pelanggan.tanggal_input else '-' }}</span>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-title">
+            <span>📜 Riwayat Transaksi</span>
+        </div>
+        
+        <div class="history-list">
             {% for t in pelanggan.transaksi %}
-                <tr>
-                    <td>#{{ t.id }}</td>
-                    <td>{{ t.tanggal.strftime('%Y-%m-%d') }} {{ t.waktu.strftime('%H:%M') }}</td>
-                    <td>Rp {{ t.total_harga_transaksi }}</td>
-                    
-                    <td>{{ t.status }}</td>
-                    
-                    <td>
-                        <a href="{{ url_for('detailtransaksi', id=t.id) }}">Lihat Nota</a>
-                    </td>
-                </tr>
+                <a href="{{ url_for('detailtransaksi', id=t.id) }}" class="history-card">
+                    <div class="history-header">
+                        <span class="nota-id">#{{ t.id }}</span>
+                        <span class="badge-status">{{ t.status }}</span>
+                    </div>
+                    <div class="history-detail">
+                        <span>{{ t.tanggal.strftime('%Y-%m-%d') }} • {{ t.waktu.strftime('%H:%M') }}</span>
+                        <span class="history-price">Rp {{ t.total_harga_transaksi }}</span>
+                    </div>
+                </a>
             {% else %}
-                <tr>
-                    <td colspan="5">Belum ada riwayat transaksi.</td>
-                </tr>
+                <div class="empty-state">
+                    Belum ada riwayat transaksi.
+                </div>
             {% endfor %}
-        </tbody>
-    </table>
-    <br>
-    <a href="{{ url_for('index') }}"><button>Kembali ke Beranda</button></a>
+        </div>
+    </div>
+</div>
 {% endblock %}

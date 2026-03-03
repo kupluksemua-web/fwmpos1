@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}Profil Pegawai - FWM Laundry{% endblock %}
+
+{% block content %}
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-blue: #0072BC;
+        --fwm-red: #ED1C24;
+        --bg-light: #F8FAFB;
+        --text-dark: #1A202C;
+        --text-muted: #718096;
+        --border-color: #E2E8F0;
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 24px 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+        box-sizing: border-box;
+        padding-bottom: 40px;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: var(--fwm-blue);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: opacity 0.2s;
+    }
+    .btn-back:active { opacity: 0.6; }
+
+    /* Kartu Profil Premium (Disesuaikan proporsinya) */
+    .profile-card {
+        background: linear-gradient(135deg, var(--fwm-blue), #005A96);
+        color: white;
+        border-radius: 20px;
+        padding: 32px 24px; /* Padding atas bawah diperbesar agar tidak terasa kosong */
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 20px rgba(0, 114, 188, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Aksen visual background kartu profil */
+    .profile-card::after {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    /* Nama diperbesar dan diberi text-shadow lembut */
+    .profile-name {
+        font-size: 30px; 
+        font-weight: 800;
+        margin-bottom: 12px;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.15); 
+    }
+
+    .profile-roles {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .role-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px 14px; /* Sedikit dilebarkan agar seimbang dengan nama yang besar */
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    .page-subtitle {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Section Header (Judul & Tombol Print) */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        margin-top: 24px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 8px;
+    }
+
+    .section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-print-sm {
+        background-color: white;
+        color: var(--fwm-blue);
+        border: 1.5px solid var(--fwm-blue);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn-print-sm:active {
+        background-color: var(--fwm-blue);
+        color: white;
+    }
+
+    /* Daftar Tugas (Pengganti Tabel) */
+    .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .task-card {
+        background: white;
+        border: 1px solid rgba(0,0,0,0.03);
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .task-id {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--fwm-blue);
+        background: rgba(0, 114, 188, 0.08);
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+
+    .task-time {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .task-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .task-customer {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .task-qty {
+        font-size: 12px;
+        font-weight: 700;
+        color: #22543D;
+        background: #F0FFF4;
+        border: 1px solid #C6F6D5;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        border: 1px dashed var(--border-color);
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+    }
+</style>
+
+<div class="mobile-container">
+    <a href="{{ url_for('index') }}" class="btn-back">
+        <span style="font-size: 18px; margin-right: 5px;">&larr;</span> Beranda
+    </a>
+
+    <div class="profile-card">
+        <div class="profile-name">{{ session.get('username') }}</div>
+        <div class="profile-roles">
+            {% for role in session.get('user_roles') %}
+                <span class="role-badge">{{ role }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="page-subtitle">📈 Rekam Jejak Pekerjaan Hari Ini</div>
+
+    <div class="section-header">
+        <div class="section-title">🧺 Tahap Cuci</div>
+        <a href="{{ url_for('cetak_rekap', tahap='cuci') }}" target="_blank" class="btn-print-sm">🖨️ Cetak</a>
+    </div>
+    <div class="task-list">
+        {% for rc in rekap_cuci %}
+        <div class="task-card">
+            <div class="task-header">
+                <span class="task-id">{{ rc.transaksi_id }}</span>
+                <span class="task-time">🕒 {{ rc.waktu_perubahan.strftime('%H:%M') }}</span>
+            </div>
+            <div class="task-body">
+                <span class="task-customer">{{ rc.nama_pelanggan }}</span>
+                <span class="task-qty">{{ rc.jumlah_item }} Item</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">Belum ada tugas cuci yang diselesaikan hari ini.</div>
+        {% endfor %}
+    </div>
+
+    <div class="section-header">
+        <div class="section-title">👕 Tahap Setrika</div>
+        <a href="{{ url_for('cetak_rekap', tahap='setrika') }}" target="_blank" class="btn-print-sm">🖨️ Cetak</a>
+    </div>
+    <div class="task-list">
+        {% for rs in rekap_setrika %}
+        <div class="task-card">
+            <div class="task-header">
+                <span class="task-id">{{ rs.transaksi_id }}</span>
+                <span class="task-time">🕒 {{ rs.waktu_perubahan.strftime('%H:%M') }}</span>
+            </div>
+            <div class="task-body">
+                <span class="task-customer">{{ rs.nama_pelanggan }}</span>
+                <span class="task-qty">{{ rs.jumlah_item }} Item</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">Belum ada tugas setrika yang diselesaikan hari ini.</div>
+        {% endfor %}
+    </div>
+
+    <div class="section-header">
+        <div class="section-title">📦 Tahap Packing</div>
+        <a href="{{ url_for('cetak_rekap', tahap='packing') }}" target="_blank" class="btn-print-sm">🖨️ Cetak</a>
+    </div>
+    <div class="task-list">
+        {% for rp in rekap_packing %}
+        <div class="task-card">
+            <div class="task-header">
+                <span class="task-id">{{ rp.transaksi_id }}</span>
+                <span class="task-time">🕒 {{ rp.waktu_perubahan.strftime('%H:%M') }}</span>
+            </div>
+            <div class="task-body">
+                <span class="task-customer">{{ rp.nama_pelanggan }}</span>
+                <span class="task-qty">{{ rp.jumlah_item }} Item</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">Belum ada tugas packing yang diselesaikan hari ini.</div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

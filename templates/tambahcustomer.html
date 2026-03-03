@@ -2,15 +2,178 @@
 {% block title %}Tambah Customer{% endblock %}
 
 {% block content %}
-    <h1>Tambah Customer</h1>
+<style>
+    /* Mengimpor Font Poppins (jika belum ada di base.html) */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    /* Definisi Variabel Warna */
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-blue: #0072BC;
+        --bg-light: #F4F7F6;
+        --text-dark: #2C3E50;
+        --text-muted: #7F8C8D;
+        --border-color: #D5DBDB;
+    }
+
+    /* Container Utama */
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 24px 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+        box-sizing: border-box;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 24px;
+        color: var(--fwm-blue);
+    }
+
+    /* Styling Form (Kartu Putih) */
+    .mobile-form {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+    }
+
+    /* Styling Kolom Input & Textarea */
+    .form-group input,
+    .form-group textarea {
+        font-family: 'Poppins', sans-serif;
+        font-size: 15px;
+        padding: 14px 16px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    /* Efek Visual saat Kolom Diklik (Focus) */
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--fwm-green);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(140, 198, 63, 0.15); /* Cahaya hijau lembut */
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+        color: #BDC3C7;
+        font-weight: 400;
+    }
+
+    .form-group textarea {
+        resize: vertical; /* Hanya bisa ditarik ke bawah */
+    }
+
+    /* Styling Tombol */
+    .form-actions {
+        margin-top: 32px;
+    }
+
+    .btn {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        border: none;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+    .btn-primary { 
+        background-color: var(--fwm-green); 
+        color: white; 
+        box-shadow: 0 4px 10px rgba(140, 198, 63, 0.3);
+    }
+
+    /* Navigasi Kembali */
+    .btn-back {
+        display: inline-block;
+        margin-bottom: 16px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
     
-    <form action="{{ url_for('tambahcustomer') }}" method="POST">
-        <input type="text" name="name" placeholder="Name" required="required"><br>
-        <input type="number" name="nomortelepon" placeholder="Nomor Telepon"><br>
-        <input type="text" name="alamat" placeholder="Alamat"><br>
+    .btn-back:hover {
+        color: var(--fwm-blue);
+    }
+</style>
+
+<div class="mobile-container">
+    <a href="{{ url_for('index') }}" class="btn-back">&larr; Kembali ke Beranda</a>
+
+    <h1 class="page-title">Tambah Customer</h1>
+    
+    <form action="{{ url_for('tambahcustomer') }}" method="POST" class="mobile-form">
         
-        <input type="text" name="catatan" placeholder="Catatan Khusus"><br>
+        <div class="form-group">
+            <label for="nama">Nama Lengkap</label>
+            <input type="text" id="nama" name="nama" placeholder="Contoh: Budi Santoso" required>
+        </div>
+
+        <div class="form-group">
+            <label for="nomortelepon">Nomor Telepon (WA)</label>
+            <input type="tel" 
+                id="nomortelepon" 
+                name="nomortelepon" 
+                placeholder="Contoh: 081234567890" 
+                pattern="^08[0-9]{8,11}$" 
+                title="Nomor telepon harus diawali '08' dan terdiri dari 10 hingga 13 digit angka." 
+                inputmode="numeric"
+                required>
+        </div>
+
+        <div class="form-group">
+            <label for="alamat">Alamat Lengkap</label>
+            <textarea id="alamat" name="alamat" rows="3" placeholder="Masukkan alamat lengkap pengiriman..."></textarea>
+        </div>
         
-        <input type="submit" value="Create">
+        <div class="form-group">
+            <label for="catatan">Catatan Khusus</label>
+            <textarea id="catatan" name="catatan" rows="2" placeholder="Contoh: Tidak menggunakan Parfum"></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Simpan Data Customer</button>
+        </div>
+
     </form>
+</div>
 {% endblock %}

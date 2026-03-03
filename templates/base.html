@@ -1,12 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Defult Value{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}FWM Laundry{% endblock %}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --fwm-green: #8CC63F;
+            --fwm-blue: #0072BC;
+            --fwm-red: #ED1C24;
+            --bg-light: #F8FAFB;
+            --text-dark: #1A202C;
+            --text-muted: #718096;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Navigasi Statik (Tidak Freeze) */
+        .top-nav {
+            background-color: var(--white);
+            padding: 20px;
+            /* position: sticky dihapus agar tidak melayang */
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .top-nav a {
+            color: var(--fwm-blue);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .main-wrapper {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 80vh;
+            box-sizing: border-box;
+            padding-top: 10px; /* Jarak halus setelah navigasi */
+        }
+
+        .footer {
+            max-width: 480px;
+            margin: 40px auto 0;
+            padding: 30px 20px;
+            text-align: center;
+            border-top: 1px solid #E2E8F0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .user-info {
+            background: #EDF2F7;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-logout {
+            background-color: var(--fwm-red);
+            color: var(--white);
+            padding: 14px 24px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            display: inline-block;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(237, 28, 36, 0.15);
+        }
+
+        .btn-logout:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
-    <p>Ini Bakal selalu ada</p>
-    {% block content%}{% endblock %}
+    
+    <nav class="top-nav">
+        <a href="{{ url_for('index') }}">
+            <span>🏠</span> FWM LAUNDRY
+        </a>
+    </nav>
+
+    <div class="main-wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        {% if session.get('user_id') %}
+            <div class="user-info">
+                Pekerja: <strong>{{ session.get('username') }}</strong>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Keluar dari Sistem</a>
+        {% else %}
+            <p>&copy; 2026 FWM Laundry POS System</p>
+        {% endif %}
+    </footer>
+
 </body>
 </html>

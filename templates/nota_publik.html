@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cek Nota - FWM Laundry</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --fwm-green: #8CC63F;
+            --fwm-blue: #0072BC;
+            --fwm-red: #ED1C24;
+            --bg-light: #F8FAFB;
+            --text-dark: #1A202C;
+            --text-muted: #718096;
+            --border-color: #E2E8F0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px 24px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Logo Brand Style */
+        .brand-name {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--fwm-blue);
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .brand-tagline {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Status Section */
+        .status-box {
+            background-color: #F1F5F9;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .status-selesai { background-color: #DCFCE7; color: #166534; }
+        .status-proses { background-color: #FEF3C7; color: #92400E; }
+
+        /* Detail Info */
+        .info-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .label { color: var(--text-muted); font-weight: 500; }
+        .value { font-weight: 600; color: var(--text-dark); }
+
+        /* Item Table Style */
+        .items-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            padding-left: 4px;
+            border-left: 4px solid var(--fwm-green);
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .item-info { display: flex; flex-direction: column; }
+        .item-name { font-weight: 600; font-size: 14px; }
+        .item-subtext { font-size: 12px; color: var(--text-muted); }
+        .item-total { font-weight: 700; color: var(--text-dark); font-size: 14px; }
+
+        /* Summary Box */
+        .summary-box {
+            background-color: var(--fwm-blue);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-label { font-size: 13px; font-weight: 500; opacity: 0.9; }
+        .summary-price { font-size: 20px; font-weight: 800; }
+
+        .payment-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 30px;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2 class="brand-name">FWM LAUNDRY</h2>
+        <p class="brand-tagline">Detail Transaksi Pelanggan</p>
+    </div>
+
+    <div class="status-box">
+        <span class="status-label">Status Cucian Anda</span>
+        <div class="status-badge {% if transaksi.status == 'Selesai' or transaksi.status == 'Siap Diambil' %}status-selesai{% else %}status-proses{% endif %}">
+            {% if transaksi.status == 'Selesai' or transaksi.status == 'Siap Diambil' %}✅{% else %}🕒{% endif %} {{ transaksi.status }}
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-row">
+            <span class="label">Nomor Nota</span>
+            <span class="value">#{{ transaksi.id }}</span>
+        </div>
+        <div class="info-row">
+            <span class="label">Tanggal Masuk</span>
+            <span class="value">
+                {{ transaksi.tanggal.strftime('%d %b %Y') }} 
+                <span>{{ transaksi.waktu.strftime('%H:%M') }}</span>
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="label">Estimasi Selesai</span>
+            <span class="value">
+                {{ transaksi.waktu_selesai.strftime('%d %b %Y') }}
+                <span>{{ transaksi.waktu_selesai.strftime('%H:%M') }}</span>
+            </span>
+        </div>
+    </div>
+
+    <h4 class="items-title">Rincian Layanan</h4>
+    <div class="order-list">
+        {% for detail in transaksi.detail_transaksi %}
+        <div class="order-item">
+            <div class="item-info">
+                <span class="item-name">{{ detail.produk.nama_produk }}</span>
+                <span class="item-subtext">{{ detail.kuantitas }} {{ detail.produk.satuan }} x Rp {{ detail.produk.harga }}</span>
+            </div>
+            <span class="item-total">Rp {{ "{:,}".format(detail.total_harga_produk).replace(',', '.') }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-row">
+            <span class="summary-label">Total yang Harus Dibayar</span>
+            <span class="summary-price">Rp {{ "{:,}".format(transaksi.total_harga_transaksi).replace(',', '.') }}</span>
+        </div>
+        
+        <div class="payment-badge">
+            Status Pembayaran: 
+            {% if transaksi.status_pembayaran == 'Lunas' %}
+                SUDAH LUNAS
+            {% else %}
+                BELUM BAYAR
+            {% endif %}
+        </div>
+    </div>
+    
+    <p class="footer-note">
+        Terima kasih telah mempercayakan pakaian Anda kepada kami.<br>
+        Simpan link ini untuk memantau cucian Anda.
+    </p>
+</div>
+
+</body>
+</html>
