@@ -2,126 +2,465 @@
 {% block title %}Tambah Transaksi{% endblock %}
 
 {% block content %}
-    <h1>Tambah Transaksi</h1>
-    <hr>
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-blue: #0072BC;
+        --fwm-red: #ED1C24;
+        --bg-light: #F4F7F6;
+        --text-dark: #2C3E50;
+        --text-muted: #7F8C8D;
+        --border-color: #D5DBDB;
+    }
+
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+        box-sizing: border-box;
+    }
+
+    .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 20px;
+        color: var(--fwm-blue);
+    }
+
+    /* Card untuk setiap langkah */
+    .step-card {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        margin-bottom: 20px;
+    }
+
+    .step-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .step-badge {
+        background: var(--fwm-blue);
+        color: white;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 12px;
+    }
+
+    /* Input & Autocomplete Styling */
+    .input-wrapper {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .form-control {
+        width: 100%;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        padding: 12px 14px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        background-color: #FAFAFA;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--fwm-green);
+        background-color: white;
+    }
+
+    .autocomplete-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: none; /* Disembunyikan secara default */
+    }
+
+    .autocomplete-item {
+        padding: 12px 14px;
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item:active {
+        background-color: #f0f0f0;
+    }
+
+    .selected-label {
+        font-size: 13px;
+        color: var(--fwm-green);
+        font-weight: 600;
+        margin-top: -5px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    /* Layout Tambah Produk */
+    .product-action-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .input-qty {
+        flex: 1;
+    }
+
+    .btn {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        padding: 12px;
+        font-size: 14px;
+        transition: transform 0.1s;
+    }
     
-    <h3>1. Pilih Pelanggan</h3>
-    <select id="pilihPelanggan">
-        <option value="" disabled selected>-- Pilih Pelanggan --</option>
+    .btn:active { transform: scale(0.95); }
+
+    .btn-add { background-color: var(--fwm-green); color: white; flex: 2; }
+    .btn-submit { background-color: var(--fwm-blue); color: white; width: 100%; font-size: 16px; padding: 16px; margin-top: 10px; }
+    .btn-delete { background-color: var(--fwm-red); color: white; border-radius: 6px; padding: 6px 10px; font-size: 12px; }
+
+    /* List Keranjang */
+    .cart-list { list-style: none; padding: 0; margin: 0; }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--border-color);
+        font-size: 14px;
+    }
+    .cart-item-info { display: flex; flex-direction: column; }
+    .cart-item-title { font-weight: 600; color: var(--text-dark); }
+    .cart-item-price { color: var(--text-muted); font-size: 12px; }
+
+    /* Ringkasan */
+    .summary-box {
+        background-color: #EBF5FB;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    .summary-total {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fwm-red);
+        border-top: 2px dashed #BDC3C7;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-bottom: 16px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+    }
+</style>
+
+<div class="mobile-container">
+    <a href="{{ url_for('index') }}" class="btn-back">&larr; Kembali</a>
+    <h1 class="page-title">Transaksi Baru</h1>
+
+    <div class="step-card">
+        <div class="step-title"><span class="step-badge">1</span> Pilih Pelanggan</div>
+        
+        <div class="input-wrapper">
+            <input type="text" id="inputCariPelanggan" class="form-control" placeholder="🔍 Ketik nama pelanggan (min 3 huruf)..." onkeyup="cariPelanggan()">
+            <div id="wadahPelanggan" class="autocomplete-list"></div>
+        </div>
+        <span id="labelPelangganTerpilih" class="selected-label" style="display: none;"></span>
+        <input type="hidden" id="hiddenPelangganId">
+    </div>
+
+    <div class="step-card">
+        <div class="step-title"><span class="step-badge">2</span> Tambah Layanan/Produk</div>
+        
+        <div class="input-wrapper">
+            <input type="text" id="inputCariProduk" class="form-control" placeholder="🔍 Ketik nama produk (min 3 huruf)..." onkeyup="cariProduk()">
+            <div id="wadahProduk" class="autocomplete-list"></div>
+        </div>
+        <span id="labelProdukTerpilih" class="selected-label" style="display: none;"></span>
+
+        <input type="hidden" id="hiddenProdukId">
+        <input type="hidden" id="hiddenProdukNama">
+        <input type="hidden" id="hiddenProdukHarga">
+
+        <div class="product-action-row">
+            <input type="number" id="jumlahProduk" class="form-control input-qty" placeholder="Jumlah" min="0.1" step="0.01" inputmode="decimal">
+            <button type="button" class="btn btn-add" onclick="tambahKeKeranjang()">+ Masukkan List</button>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-title"><span class="step-badge">3</span> Rincian Transaksi</div>
+        
+        <ul id="listKeranjang" class="cart-list">
+            </ul>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
+
+        <div class="summary-box">
+            <div class="summary-row">
+                <span>Subtotal Belanja</span>
+                <strong>Rp <span id="labelTotal">0</span></strong>
+            </div>
+            <div class="summary-row">
+                <span>Diskon (Rp)</span>
+                <input type="number" id="inputDiskon" class="form-control" value="0" min="0" oninput="hitungTotalAkhir()" style="width: 100px; padding: 6px 10px; text-align: right;" inputmode="numeric">
+            </div>
+            <div class="summary-row summary-total">
+                <span>TOTAL AKHIR</span>
+                <span>Rp <span id="labelTotalAkhir">0</span></span>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-submit" onclick="buatTransaksi()">Buat Transaksi Sekarang</button>
+    </div>
+</div>
+
+<script>
+    // --- 1. MENYIAPKAN DATA DARI JINJA KE JAVASCRIPT ---
+    const daftarPelanggan = [
         {% for p in pelanggan %}
-            <option value="{{ p.id }}">{{ p.nama_pelanggan }} - {{ p.nomor_telepon }}</option>
+        { id: "{{ p.id }}", nama: "{{ p.nama_pelanggan }}", telp: "{{ p.nomor_telepon }}" },
         {% endfor %}
-    </select>
-    <hr>
+    ];
 
-    <h3>2. Tambah Produk</h3>
-    <select id="pilihProduk">
-        <option value="" disabled selected>-- Pilih Produk --</option>
+    const daftarProduk = [
         {% for pr in produk %}
-            <option value="{{ pr.id }}" data-nama="{{ pr.nama_produk }}" data-harga="{{ pr.harga }}">
-                {{ pr.nama_produk }} - Rp{{ pr.harga }}
-            </option>
+        { id: "{{ pr.id }}", nama: "{{ pr.nama_produk }}", harga: {{ pr.harga }} },
         {% endfor %}
-    </select>
-    <input type="number" id="jumlahProduk" placeholder="Jumlah" min="1">
-    <button type="button" onclick="tambahKeKeranjang()">Tambah ke List</button>
-    <hr>
+    ];
 
-    <h3>3. Produk yang dipilih</h3>
-    <ul id="listKeranjang">
-        </ul>
-    <hr>
+    // --- 2. LOGIKA PENCARIAN 3 KARAKTER ---
+    
+    // Pencarian Pelanggan
+    function cariPelanggan() {
+        const input = document.getElementById('inputCariPelanggan').value.toLowerCase();
+        const wadah = document.getElementById('wadahPelanggan');
+        wadah.innerHTML = ''; // Kosongkan hasil sebelumnya
 
-    <label>Total Belanja: Rp <span id="labelTotal">0</span></label><br>
-    <label>Diskon: Rp </label>
-    <input type="number" id="inputDiskon" value="0" min="0" oninput="hitungTotalAkhir()"><br>
-    <label><strong>Total Akhir: Rp <span id="labelTotalAkhir">0</span></strong></label><br><br>
-
-    <button type="button" onclick="buatTransaksi()">Buat Transaksi</button>
-
-    <script>
-        // Array untuk menyimpan data barang sementara
-        let keranjang = [];
-        let totalBelanja = 0;
-
-        function tambahKeKeranjang() {
-            const dropdownProduk = document.getElementById('pilihProduk');
-            const opsiTerpilih = dropdownProduk.options[dropdownProduk.selectedIndex];
-            const jumlah = parseInt(document.getElementById('jumlahProduk').value);
-
-            // Validasi jika belum pilih produk atau jumlah kosong
-            if (opsiTerpilih.value === "" || isNaN(jumlah) || jumlah <= 0) {
-                alert("Pilih produk dan masukkan jumlah yang benar!");
-                return;
+        if (input.length >= 3) {
+            const hasil = daftarPelanggan.filter(p => p.nama.toLowerCase().includes(input) || p.telp.includes(input));
+            if (hasil.length > 0) {
+                wadah.style.display = 'block';
+                hasil.forEach(p => {
+                    wadah.innerHTML += `<div class="autocomplete-item" onclick="pilihPelanggan('${p.id}', '${p.nama}', '${p.telp}')">${p.nama} - ${p.telp}</div>`;
+                });
+            } else {
+                wadah.style.display = 'block';
+                wadah.innerHTML = `<div class="autocomplete-item" style="color: #7F8C8D; cursor: default;">Pelanggan tidak ditemukan</div>`;
             }
+        } else {
+            wadah.style.display = 'none';
+        }
+    }
 
-            // Ambil data dari tag option
-            const produkId = opsiTerpilih.value;
-            const namaProduk = opsiTerpilih.getAttribute('data-nama');
-            const harga = parseInt(opsiTerpilih.getAttribute('data-harga'));
-            
-            // Masukkan ke array keranjang
-            keranjang.push({
-                produk_id: produkId,
-                nama: namaProduk,
-                harga: harga,
-                jumlah: jumlah
-            });
+    function pilihPelanggan(id, nama, telp) {
+        document.getElementById('hiddenPelangganId').value = id;
+        document.getElementById('inputCariPelanggan').value = ""; // Kosongkan input
+        document.getElementById('wadahPelanggan').style.display = 'none'; // Sembunyikan dropdown
+        
+        const label = document.getElementById('labelPelangganTerpilih');
+        label.innerText = `✓ Terpilih: ${nama} (${telp})`;
+        label.style.display = 'block';
+    }
 
-            tampilkanKeranjang();
+    // Pencarian Produk
+    function cariProduk() {
+        const input = document.getElementById('inputCariProduk').value.toLowerCase();
+        const wadah = document.getElementById('wadahProduk');
+        wadah.innerHTML = '';
+
+        if (input.length >= 3) {
+            const hasil = daftarProduk.filter(pr => pr.nama.toLowerCase().includes(input));
+            if (hasil.length > 0) {
+                wadah.style.display = 'block';
+                hasil.forEach(pr => {
+                    wadah.innerHTML += `<div class="autocomplete-item" onclick="pilihProduk('${pr.id}', '${pr.nama}', ${pr.harga})">${pr.nama} - Rp${pr.harga}</div>`;
+                });
+            } else {
+                wadah.style.display = 'block';
+                wadah.innerHTML = `<div class="autocomplete-item" style="color: #7F8C8D; cursor: default;">Produk tidak ditemukan</div>`;
+            }
+        } else {
+            wadah.style.display = 'none';
+        }
+    }
+
+    function pilihProduk(id, nama, harga) {
+        document.getElementById('hiddenProdukId').value = id;
+        document.getElementById('hiddenProdukNama').value = nama;
+        document.getElementById('hiddenProdukHarga').value = harga;
+        
+        document.getElementById('inputCariProduk').value = ""; 
+        document.getElementById('wadahProduk').style.display = 'none';
+        
+        const label = document.getElementById('labelProdukTerpilih');
+        label.innerText = `✓ Terpilih: ${nama} (Rp${harga})`;
+        label.style.display = 'block';
+
+        // Fokus otomatis ke input jumlah agar kasir cepat mengetik
+        document.getElementById('jumlahProduk').focus();
+    }
+
+
+    // --- 3. LOGIKA KERANJANG (Diperbarui tampilannya) ---
+    let keranjang = [];
+    let totalBelanja = 0;
+
+    function tambahKeKeranjang() {
+        const produkId = document.getElementById('hiddenProdukId').value;
+        const namaProduk = document.getElementById('hiddenProdukNama').value;
+        const harga = parseInt(document.getElementById('hiddenProdukHarga').value);
+        const jumlah = parseFloat(document.getElementById('jumlahProduk').value);
+
+        if (!produkId) {
+            alert("Silakan cari dan pilih layanan/produk terlebih dahulu!");
+            return;
+        }
+        if (isNaN(jumlah) || jumlah <= 0) {
+            alert("Masukkan jumlah yang valid!");
+            return;
+        }
+        
+        keranjang.push({
+            produk_id: produkId,
+            nama: namaProduk,
+            harga: harga,
+            jumlah: jumlah
+        });
+
+        // Reset Form Produk
+        document.getElementById('jumlahProduk').value = '';
+        document.getElementById('hiddenProdukId').value = '';
+        document.getElementById('hiddenProdukNama').value = '';
+        document.getElementById('hiddenProdukHarga').value = '';
+        document.getElementById('labelProdukTerpilih').style.display = 'none';
+        
+        tampilkanKeranjang();
+    }
+
+    function hapusDariKeranjang(index) {
+        keranjang.splice(index, 1);
+        tampilkanKeranjang();
+    }
+
+    function tampilkanKeranjang() {
+        const list = document.getElementById('listKeranjang');
+        list.innerHTML = ''; 
+        totalBelanja = 0;    
+
+        if(keranjang.length === 0) {
+            list.innerHTML = `<li style="text-align:center; color:#7F8C8D; font-size: 13px; padding: 10px 0;">Belum ada item di keranjang</li>`;
         }
 
-        function tampilkanKeranjang() {
-            const list = document.getElementById('listKeranjang');
-            list.innerHTML = ''; // Kosongkan list HTML
-            totalBelanja = 0;    // Reset hitungan
+        keranjang.forEach((item, index) => {
+            const subtotal = item.harga * item.jumlah;
+            totalBelanja += subtotal;
 
-            // Looping isi array keranjang
-            keranjang.forEach((item, index) => {
-                const subtotal = item.harga * item.jumlah;
-                totalBelanja += subtotal;
+            list.innerHTML += `
+                <li class="cart-item">
+                    <div class="cart-item-info">
+                        <span class="cart-item-title">${item.nama}</span>
+                        <span class="cart-item-price">Rp${item.harga} x ${item.jumlah}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <strong>Rp${subtotal}</strong>
+                        <button type="button" class="btn-delete" onclick="hapusDariKeranjang(${index})">X</button>
+                    </div>
+                </li>
+            `;
+        });
 
-                // Buat elemen <li> baru
-                const li = document.createElement('li');
-                li.innerHTML = `${item.nama} - Rp${item.harga} x ${item.jumlah} = Rp${subtotal}`;
-                list.appendChild(li);
-            });
+        hitungTotalAkhir();
+    }
 
-            hitungTotalAkhir();
+    function hitungTotalAkhir() {
+        document.getElementById('labelTotal').innerText = totalBelanja.toLocaleString('id-ID');
+        
+        let diskon = parseInt(document.getElementById('inputDiskon').value);
+        if(isNaN(diskon)) diskon = 0;
+
+        const totalAkhir = totalBelanja - diskon;
+        document.getElementById('labelTotalAkhir').innerText = (totalAkhir > 0 ? totalAkhir : 0).toLocaleString('id-ID');
+    }
+
+    // Panggil saat pertama kali diload agar text "Belum ada item" muncul
+    tampilkanKeranjang();
+
+    // --- 4. KIRIM DATA KE BACKEND ---
+    async function buatTransaksi() {
+        const pelangganId = document.getElementById('hiddenPelangganId').value;
+        const diskon = document.getElementById('inputDiskon').value || 0;
+
+        if (!pelangganId) {
+            alert("Pastikan Anda sudah memilih pelanggan!");
+            return;
+        }
+        if (keranjang.length === 0) {
+            alert("Keranjang tidak boleh kosong!");
+            return;
         }
 
-        function hitungTotalAkhir() {
-            document.getElementById('labelTotal').innerText = totalBelanja;
-            
-            let diskon = parseInt(document.getElementById('inputDiskon').value);
-            if(isNaN(diskon)) diskon = 0;
+        // Tampilkan loading state di tombol
+        const btnSubmit = document.querySelector('.btn-submit');
+        const originalText = btnSubmit.innerText;
+        btnSubmit.innerText = "Memproses...";
+        btnSubmit.disabled = true;
 
-            const totalAkhir = totalBelanja - diskon;
-            document.getElementById('labelTotalAkhir').innerText = totalAkhir;
-        }
+        const dataKirim = {
+            pelanggan_id: pelangganId,
+            diskon: diskon,
+            keranjang: keranjang
+        };
 
-        async function buatTransaksi() {
-            const pelangganId = document.getElementById('pilihPelanggan').value;
-            const diskon = document.getElementById('inputDiskon').value;
-
-            // Validasi sebelum kirim ke database
-            if (pelangganId === "") {
-                alert("Pilih pelanggan terlebih dahulu!");
-                return;
-            }
-            if (keranjang.length === 0) {
-                alert("Keranjang masih kosong!");
-                return;
-            }
-
-            // Kemas data menjadi format JSON
-            const dataKirim = {
-                pelanggan_id: pelangganId,
-                diskon: diskon,
-                keranjang: keranjang
-            };
-
-            // Kirim ke rute Python menggunakan Fetch API
+        try {
             const response = await fetch('/tambahtransaksi', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -130,11 +469,18 @@
 
             const hasil = await response.json();
             
-            // Jika sukses, pindah halaman sesuai URL dari Python
             if (hasil.status === 'success') {
                 alert("Transaksi Berhasil Dibuat!");
                 window.location.href = hasil.redirect_url;
+            } else {
+                alert("Terjadi kesalahan: " + (hasil.message || "Gagal membuat transaksi."));
             }
+        } catch (error) {
+            alert("Koneksi bermasalah. Coba lagi.");
+        } finally {
+            btnSubmit.innerText = originalText;
+            btnSubmit.disabled = false;
         }
-    </script>
+    }
+</script>
 {% endblock %}

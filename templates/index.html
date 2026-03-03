@@ -2,30 +2,188 @@
 {% block title %}Index Page{% endblock %}
 
 {% block content %}
-    <h1>Hello World</h1>
-    <a href="{{ url_for('tambahcustomer') }}">
-        <button>Tambah Customer</button>
-    </a><br><br>
-    <a href="{{ url_for('tambahtransaksi') }}">
-        <button>Tambah Transaksi</button>
-    </a><br><br>
-    <a href="{{ url_for('caricustomer') }}">
-        <button>Cari Customer</button>
-    </a><br>
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    /* Palet Warna dari Logo FWM */
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-red: #ED1C24;
+        --fwm-blue: #0072BC;
+        --fwm-yellow: #FBB03B;
+        --bg-light: #F4F7F6;
+        --text-dark: #2C3E50;
+        --text-muted: #7F8C8D;
+    }
+
+    /* Reset & Typography */
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px; /* Lebar maksimal menyerupai handphone */
+        margin: 0 auto;   /* Tengah di layar desktop */
+        padding: 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+    }
+
+    .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 24px;
+        color: var(--fwm-blue);
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 32px;
+        margin-bottom: 16px;
+        color: var(--text-dark);
+    }
+
+    /* Layout Menu */
+    .menu-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 14px; /* Jarak antar tombol */
+    }
+
+    /* Gaya Tombol (UX Handphone) */
+    .btn {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        box-sizing: border-box;
+        transition: transform 0.1s ease, box-shadow 0.2s ease;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .btn:active {
+        transform: scale(0.97); /* Efek ditekan */
+    }
+
+    /* Varian Tombol */
+    .btn-primary { background-color: var(--fwm-green); color: white; }
+    .btn-secondary { background-color: white; color: var(--fwm-blue); border: 2px solid var(--fwm-blue); }
+    .btn-warning { background-color: var(--fwm-yellow); color: var(--text-dark); }
+    .btn-danger { background-color: var(--fwm-red); color: white; }
     
-    <hr>
+    .divider {
+        border: none;
+        border-top: 2px dashed #D5DBDB;
+        margin: 30px 0;
+    }
+
+    /* Daftar Transaksi */
+    .transaction-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .transaction-card {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .nota-badge {
+        font-size: 12px;
+        background: var(--bg-light);
+        padding: 4px 8px;
+        border-radius: 6px;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .customer-name {
+        font-weight: 600;
+        font-size: 15px;
+    }
+
+    .transaction-price {
+        color: var(--fwm-green);
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .link-detail {
+        color: var(--fwm-blue);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        align-self: flex-start;
+        margin-top: 4px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 24px;
+        background: white;
+        border-radius: 12px;
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+</style>
+
+<div class="mobile-container">
+    <h1 class="page-title">Pilih Menu Berikut!</h1>
     
-    <h2>Transaksi Hari ini</h2>
-    <ul>
+    <div class="menu-grid">
+        <a href="{{ url_for('tambahcustomer') }}" class="btn btn-primary">Tambah Customer</a>
+        <a href="{{ url_for('tambahtransaksi') }}" class="btn btn-secondary">Tambah Transaksi</a>
+        <a href="{{ url_for('caricustomer') }}" class="btn btn-secondary">Cari Customer</a>
+        <a href="{{ url_for('updatestatus') }}" class="btn btn-secondary">Update Status</a>
+        <a href="{{ url_for('profile') }}" class="btn btn-secondary">Profile</a>
+
+        {% if session.get('user_roles') and 'Owner' in session.get('user_roles') %}
+        <hr class="divider" style="margin: 10px 0;">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Dashboard</a>
+        <a href="{{ url_for('tambahuser') }}" class="btn btn-warning">+ Tambah Pegawai</a>
+        <a href="{{ url_for('kelolauser') }}" class="btn btn-danger">⚙️ Kelola / Reset Password</a>
+        {% endif %}
+    </div>
+    
+    <hr class="divider">
+    
+    <h2 class="section-title">Transaksi Hari ini</h2>
+    <ul class="transaction-list">
         {% for t in transaksi %}
-            <li>
-                <strong>Nota #{{ t.id }}</strong> - 
-                {{ t.pelanggan.name }} - 
-                Rp {{ t.total_harga_transaksi }} 
-                <a href="{{ url_for('detailtransaksi', id=t.id) }}">[Lihat Detail]</a>
+            <li class="transaction-card">
+                <div class="transaction-header">
+                    <span class="customer-name">{{ t.pelanggan.nama_pelanggan }}</span>
+                    <span class="nota-badge">Nota #{{ t.id }}</span>
+                </div>
+                <div class="transaction-price">Rp {{ t.total_harga_transaksi }}</div>
+                <a href="{{ url_for('detailtransaksi', id=t.id) }}" class="link-detail">Lihat Detail &rarr;</a>
             </li>
         {% else %}
-            <li>Belum ada transaksi yang masuk hari ini. Ayo semangat!</li>
+            <li class="empty-state">
+                Belum ada transaksi yang masuk hari ini. Ayo semangat! 💪
+            </li>
         {% endfor %}
     </ul>
+</div>
 {% endblock %}

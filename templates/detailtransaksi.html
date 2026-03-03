@@ -2,95 +2,484 @@
 {% block title %}Detail Transaksi{% endblock %}
 
 {% block content %}
-    <h1>Nota Transaksi #{{ transaksi.id }}</h1>
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-blue: #0072BC;
+        --fwm-red: #ED1C24;
+        --bg-light: #F8FAFB; /* Sedikit lebih cerah dan bersih */
+        --text-dark: #1A202C; /* Lebih kontras */
+        --text-muted: #718096;
+        --border-color: #E2E8F0;
+        --wa-color: #25D366;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 24px 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+        box-sizing: border-box;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: var(--fwm-blue);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: opacity 0.2s;
+    }
     
-    <p><strong>Waktu Masuk:</strong> {{ transaksi.tanggal.strftime('%Y-%m-%d') }} {{ transaksi.waktu.strftime('%H:%M:%S') }}</p>
+    .btn-back:active { opacity: 0.6; }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .nota-id {
+        font-size: 14px;
+        color: var(--fwm-blue);
+        font-weight: 700;
+        background: rgba(0, 114, 188, 0.08);
+        display: inline-block;
+        padding: 2px 12px;
+        border-radius: 20px;
+        margin-top: 8px;
+    }
+
+    /* Layout Kartu Informasi */
+    .info-card {
+        background: white;
+        padding: 20px;
+        border-radius: 20px; /* Lebih rounded agar modern */
+        box-shadow: var(--card-shadow);
+        margin-bottom: 20px;
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .card-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-dark);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 12px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .info-label { color: var(--text-muted); font-weight: 400; }
+    .info-value { font-weight: 600; text-align: right; color: var(--text-dark); }
+
+    /* Badge Status */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .badge-pending { background-color: #FEF3C7; color: #92400E; }
+    .badge-success { background-color: #DCFCE7; color: #166534; }
+
+    /* List Rincian Pesanan */
+    .order-item {
+        border-bottom: 1px solid #F1F5F9;
+        padding: 14px 0;
+    }
+    .order-item:last-child { border-bottom: none; }
     
-    <p><strong>Estimasi Selesai:</strong> {{ transaksi.waktu_selesai.strftime('%Y-%m-%d') }}</p>
+    .item-name { font-weight: 700; font-size: 15px; color: var(--text-dark); margin-bottom: 4px;}
+    .item-calc { 
+        display: flex; 
+        justify-content: space-between; 
+        font-size: 13px; 
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+    .item-subtotal { font-weight: 700; color: var(--text-dark); font-size: 14px; }
+
+    /* Ringkasan Biaya */
+    .totals-box {
+        background-color: #F8FAFC;
+        border-radius: 16px;
+        padding: 18px;
+        margin-top: 10px;
+    }
+    .total-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; }
+    .total-final {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        font-size: 20px; 
+        font-weight: 800;
+        color: var(--fwm-blue);
+        border-top: 2px dashed #CBD5E0;
+        padding-top: 14px;
+        margin-top: 10px;
+    }
+
+    /* Swipe to Pay Styling Premium */
+    .swipe-container {
+        position: relative;
+        height: 60px;
+        background-color: #EDF2F7;
+        border-radius: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        user-select: none;
+        margin-top: 24px;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .swipe-text {
+        color: #4A5568;
+        font-weight: 700;
+        font-size: 14px;
+        z-index: 1;
+        pointer-events: none;
+        letter-spacing: 0.5px;
+    }
+    .swipe-btn {
+        position: absolute;
+        left: 6px;
+        top: 6px;
+        width: 48px;
+        height: 48px;
+        background-color: white;
+        border-radius: 50%;
+        color: var(--fwm-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        z-index: 2;
+        font-size: 22px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        transition: transform 0.1s;
+    }
+    .swipe-btn:active { cursor: grabbing; background-color: #f9f9f9; }
+    .swipe-progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--fwm-green), #A3D95D);
+        z-index: 0;
+        border-radius: 35px 0 0 35px;
+    }
     
-    <p><strong>Status Cucian:</strong> {{ transaksi.status }}</p>
-    <p><strong>Status Pembayaran:</strong> {{ transaksi.status_pembayaran }}</p>
-    <hr>
-    
-    <h3>Informasi Pelanggan</h3>
-    <p><strong>Nama:</strong> {{ transaksi.pelanggan.nama_pelanggan }}</p>
-    <p><strong>No. Telepon:</strong> {{ transaksi.pelanggan.nomor_telepon }}</p>
-    <p><strong>Alamat:</strong> {{ transaksi.pelanggan.alamat }}</p>
-    <hr>
-    
-    <h3>Rincian Pesanan</h3>
-    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; max-width: 600px;">
-        <thead>
-            <tr style="background-color: #f2f2f2;">
-                <th>Nama Produk</th>
-                <th>Harga Satuan</th>
-                <th>Kuantitas</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for detail in transaksi.detail_transaksi %}
-                <tr>
-                    <td>{{ detail.produk.nama_produk }}</td>
-                    <td>Rp {{ detail.produk.harga }}</td>
-                    <td>{{ detail.kuantitas }} {{ detail.produk.satuan }}</td>
-                    <td>Rp {{ detail.total_harga_produk }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <br>
-    
-    <div style="max-width: 600px; text-align: right;">
-        <p><strong>Total Belanja:</strong> Rp {{ transaksi.total_harga_transaksi + transaksi.diskon }}</p>
-        <p><strong>Diskon:</strong> Rp {{ transaksi.diskon }}</p>
-        <h3><strong>Total Akhir: Rp {{ transaksi.total_harga_transaksi }}</strong></h3>
-    </div>
-    
-    <hr>
-    <a href="{{ url_for('index') }}">
-        <button type="button">Kembali ke Beranda</button>
-        <button type="button" onclick="window.open('{{ url_for('cetaktransaksi', id=transaksi.id) }}', '_blank')">
-        Cetak Struk
-        </button>
-        <button type="button" onclick="kirimWA()" style="background-color: #25D366; color: white; border: none; padding: 5px 10px; cursor: pointer;">
-            Chat ke WA
-        </button>
+    .badge-lunas-big {
+        background-color: #F0FFF4;
+        color: #22543D;
+        padding: 18px;
+        border-radius: 16px;
+        text-align: center;
+        font-weight: 800;
+        font-size: 16px;
+        margin-top: 24px;
+        border: 2px solid #C6F6D5;
+        letter-spacing: 1px;
+    }
+
+    /* Tombol Navigasi Bawah */
+    .action-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+    .btn {
+        flex: 1;
+        padding: 16px;
+        border-radius: 16px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn:active { transform: scale(0.95); opacity: 0.8; }
+    .btn-wa { 
+        background-color: var(--wa-color); 
+        color: white; 
+        box-shadow: 0 6px 16px rgba(37, 211, 102, 0.25); 
+    }
+    .btn-print { 
+        background-color: var(--fwm-blue); 
+        color: white; 
+        box-shadow: 0 6px 16px rgba(0, 114, 188, 0.25); 
+    }
+</style>
+
+<div class="mobile-container">
+    <a href="{{ url_for('index') }}" class="btn-back">
+        <span style="font-size: 18px; margin-right: 5px;">&larr;</span> Beranda
     </a>
+    
+    <div class="page-header">
+        <h1 class="page-title">Nota Transaksi</h1>
+        <div class="nota-id">INV-{{ transaksi.id }}</div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-title">🕒 Status Laundry</div>
+        <div class="info-row">
+            <span class="info-label">Waktu Masuk</span>
+            <span class="info-value">{{ transaksi.tanggal.strftime('%d %b %Y') }}, {{ transaksi.waktu.strftime('%H:%M') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Estimasi Selesai</span>
+            <span class="info-value">{{ transaksi.waktu_selesai.strftime('%d %b %Y') }}, {{ transaksi.waktu_selesai.strftime('%H:%M') }}</span>
+        </div>
+        <div class="info-row" style="align-items: center; margin-top: 15px;">
+            <span class="info-label">Status Cucian</span>
+            <span class="badge {% if transaksi.status == 'Selesai' %}badge-success{% else %}badge-pending{% endif %}">
+                {{ transaksi.status }}
+            </span>
+        </div>
+        <div class="info-row" style="align-items: center;">
+            <span class="info-label">Pembayaran</span>
+            <span class="badge {% if transaksi.status_pembayaran == 'Lunas' %}badge-success{% else %}badge-pending{% endif %}">
+                {{ transaksi.status_pembayaran }}
+            </span>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-title">👤 Informasi Pelanggan</div>
+        <div class="info-row">
+            <span class="info-label">Nama</span>
+            <span class="info-value">{{ transaksi.pelanggan.nama_pelanggan }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Telepon</span>
+            <span class="info-value">{{ transaksi.pelanggan.nomor_telepon }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Alamat</span>
+            <span class="info-value" style="text-align: right; max-width: 65%;">{{ transaksi.pelanggan.alamat }}</span>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-title">🧺 Rincian Pesanan</div>
+        
+        <div style="margin-bottom: 10px;">
+            {% for detail in transaksi.detail_transaksi %}
+            <div class="order-item">
+                <div class="item-name">{{ detail.produk.nama_produk }}</div>
+                <div class="item-calc">
+                    <span>{{ detail.kuantitas }} {{ detail.produk.satuan }} x Rp {{ detail.produk.harga }}</span>
+                    <span class="item-subtotal">Rp {{ detail.total_harga_produk }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="totals-box">
+            <div class="total-row">
+                <span class="info-label">Subtotal</span>
+                <span style="font-weight: 600;">Rp {{ transaksi.total_harga_transaksi + transaksi.diskon }}</span>
+            </div>
+            <div class="total-row">
+                <span class="info-label">Diskon</span>
+                <span style="color: var(--fwm-red); font-weight: 700;">- Rp {{ transaksi.diskon }}</span>
+            </div>
+            <div class="total-final">
+                <span>Total Akhir</span>
+                <span>Rp {{ transaksi.total_harga_transaksi }}</span>
+            </div>
+        </div>
+
+        {% if transaksi.status_pembayaran == 'Belum bayar' %}
+            {% set safe_id = transaksi.id.replace('/', '-') %}
+            <div class="swipe-container" id="container-{{ safe_id }}">
+                <div class="swipe-progress" id="progress-{{ safe_id }}"></div>
+                <div class="swipe-text" id="text-{{ safe_id }}">Geser untuk Lunasi ➔</div>
+                <div class="swipe-btn" id="btn-{{ safe_id }}" 
+                     onmousedown="startSwipe(event, '{{ safe_id }}', '{{ transaksi.id }}')" 
+                     ontouchstart="startSwipe(event, '{{ safe_id }}', '{{ transaksi.id }}')">💰</div>
+            </div>
+        {% else %}
+            <div class="badge-lunas-big">
+                ✔ PEMBAYARAN LUNAS
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="action-group">
+        <button type="button" class="btn btn-print" onclick="window.open('{{ url_for('cetaktransaksi', id=transaksi.id) }}', '_blank')">
+            🖨️ Cetak Struk
+        </button>
+        <button type="button" class="btn btn-wa" onclick="kirimWA()">
+            💬 Chat WA
+        </button>
+    </div>
+</div>
 
 <script>
-        function kirimWA() {
-            let noWa = "{{ transaksi.pelanggan.nomor_telepon }}";
+    // --- LOGIKA SWIPE TO PAY ---
+    let isDragging = false;
+    let currentBtn = null;
+    let startX = 0;
+    let maxTranslate = 0;
+    let currentSafeId = null;
+    let currentRealId = null; 
+
+    function startSwipe(e, safeId, realId) {
+        isDragging = true;
+        currentSafeId = safeId;
+        currentRealId = realId;
+        
+        currentBtn = document.getElementById(`btn-${safeId}`);
+        startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        
+        const container = document.getElementById(`container-${safeId}`);
+        maxTranslate = container.clientWidth - currentBtn.clientWidth - 12; // Adjusted for new padding
+        
+        currentBtn.style.transition = 'none';
+        document.getElementById(`text-${safeId}`).style.opacity = '0.2'; 
+    }
+
+    document.addEventListener('mousemove', moveSwipe);
+    document.addEventListener('touchmove', moveSwipe);
+
+    function moveSwipe(e) {
+        if (!isDragging || !currentBtn) return;
+        
+        const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        let moveX = currentX - startX;
+
+        if (moveX < 0) moveX = 0;
+        if (moveX > maxTranslate) moveX = maxTranslate;
+
+        currentBtn.style.transform = `translateX(${moveX}px)`;
+        document.getElementById(`progress-${currentSafeId}`).style.width = `${moveX + 28}px`; 
+    }
+
+    document.addEventListener('mouseup', endSwipe);
+    document.addEventListener('touchend', endSwipe);
+
+    function endSwipe() {
+        if (!isDragging || !currentBtn) return;
+        isDragging = false;
+
+        const currentTransform = currentBtn.style.transform;
+        const moveX = parseFloat(currentTransform.replace('translateX(', '').replace('px)', '')) || 0;
+
+        if (moveX >= maxTranslate - 5) {
+            currentBtn.style.transform = `translateX(${maxTranslate}px)`;
+            currentBtn.style.color = "white";
+            currentBtn.style.backgroundColor = "transparent";
+            currentBtn.style.boxShadow = "none";
+            currentBtn.innerHTML = "✔";
             
-            if (noWa.startsWith("0")) {
-                noWa = "62" + noWa.substring(1);
-            } else if (noWa.startsWith("+")) {
-                noWa = noWa.substring(1); 
-            }
+            const textEl = document.getElementById(`text-${currentSafeId}`);
+            textEl.style.opacity = '1';
+            textEl.style.color = 'white';
+            textEl.innerText = "Memproses...";
+            
+            fetch('/bayar_transaksi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trx_id: currentRealId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    textEl.innerText = "LUNAS!";
+                    setTimeout(() => { location.reload(); }, 600);
+                } else {
+                    alert("Error: " + data.message);
+                    resetSwipe();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resetSwipe();
+            });
 
-            let rincianPesanan = "";
-            {% for detail in transaksi.detail_transaksi %}
-            // Perbaikan: Mengganti kutip ganda dengan backtick (`) agar aman dari string yang terpotong
-            rincianPesanan += `- {{ detail.produk.nama_produk }} ({{ detail.kuantitas }} {{ detail.produk.satuan }}) : Rp {{ detail.total_harga_produk }}\n`;
-            {% endfor %}
+        } else {
+            resetSwipe();
+        }
+        
+        currentBtn = null;
+    }
 
-            // Perbaikan: Menghapus tanda $ di depan {{ transaksi.id }} 
-            // Perbaikan: Menambahkan ( ... or 0) pada diskon
-            let pesan = `*Nota Transaksi #{{ transaksi.id }}*
+    function resetSwipe() {
+        if(!currentBtn) return;
+        currentBtn.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        currentBtn.style.transform = `translateX(0px)`;
+        document.getElementById(`progress-${currentSafeId}`).style.width = '0px';
+        document.getElementById(`text-${currentSafeId}`).style.opacity = '1';
+    }
+
+    function kirimWA() {
+        let noWa = "{{ transaksi.pelanggan.nomor_telepon }}";
+        
+        if (noWa.startsWith("0")) {
+            noWa = "62" + noWa.substring(1);
+        } else if (noWa.startsWith("+")) {
+            noWa = noWa.substring(1); 
+        }
+
+        let rincianPesanan = "";
+        {% for detail in transaksi.detail_transaksi %}
+        rincianPesanan += `- {{ detail.produk.nama_produk }} ({{ detail.kuantitas }} {{ detail.produk.satuan }}) : Rp {{ detail.total_harga_produk }}\n`;
+        {% endfor %}
+
+        let pesan = `*Nota Transaksi #{{ transaksi.id }}*
 Yth. Pelanggan: {{ transaksi.pelanggan.nama_pelanggan }}
 
 Halo, Kak! Berikut adalah rincian nota transaksi laundry Anda:
 
 📅 *Informasi Transaksi*
-Waktu Masuk: {{ transaksi.tanggal.strftime('%Y-%m-%d') }} {{ transaksi.waktu.strftime('%H:%M:%S') }}
-Estimasi Selesai: {{ transaksi.waktu_selesai.strftime('%Y-%m-%d') }}
+Waktu Masuk: {{ transaksi.tanggal.strftime('%d-%m-%Y') }} {{ transaksi.waktu.strftime('%H:%M:%S') }}
+Estimasi Selesai: {{ transaksi.waktu_selesai.strftime('%d-%m-%Y') }}
 Status Cucian: {{ transaksi.status }}
 Status Pembayaran: {{ transaksi.status_pembayaran }}
 
 📍 *Data Pelanggan*
 Nama: {{ transaksi.pelanggan.nama_pelanggan }}
 No. Telp: {{ transaksi.pelanggan.nomor_telepon }}
-Alamat: {{ transaksi.pelanggan.alamat }}
 
 🧺 *Rincian Pesanan*
 ${rincianPesanan}
@@ -99,10 +488,13 @@ Total Belanja: Rp {{ transaksi.total_harga_transaksi + (transaksi.diskon or 0) }
 Diskon: Rp {{ (transaksi.diskon or 0) }}
 *TOTAL AKHIR: Rp {{ transaksi.total_harga_transaksi }}*
 
+Untuk memantau *Status Cucian* secara real-time, silakan klik link aman berikut:
+🌐 {{ link_publik }}
+
 Terima kasih telah mempercayakan cucian Anda kepada kami! Jika ada pertanyaan, silakan hubungi kami kembali.`;
 
-            let urlWA = `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
-            window.open(urlWA, '_blank');
-        }
-    </script>
+        let urlWA = `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
+        window.open(urlWA, '_blank');
+    }
+</script>
 {% endblock %}

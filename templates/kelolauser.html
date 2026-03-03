@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Kelola Pegawai - FWM Laundry{% endblock %}
+
+{% block content %}
+<style>
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: white;
+    }
+    .history-table th, .history-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+    .history-table th {
+        background-color: #f2f2f2;
+    }
+    .reset-form {
+        display: flex;
+        gap: 10px;
+    }
+    .reset-form input[type="password"] {
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 150px;
+    }
+    .btn-reset {
+        background-color: #dc3545; /* Merah untuk tindakan waspada */
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .btn-reset:hover {
+        background-color: #c82333;
+    }
+    .badge-role {
+        background-color: #17a2b8;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        margin-right: 4px;
+        display: inline-block;
+    }
+</style>
+
+<h2>Kelola Pegawai & Reset Password</h2>
+<p>Halaman khusus Owner untuk memantau akun pegawai dan mereset kata sandi jika mereka lupa.</p>
+
+<table class="history-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Peran (Role)</th>
+            <th>Aksi (Reset Password)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td><strong>{{ u.username }}</strong></td>
+            <td>
+                {% for role in u.roles %}
+                    <span class="badge-role">{{ role.nama_role }}</span>
+                {% else %}
+                    <span style="color: gray; font-size: 12px;">Belum ada role</span>
+                {% endfor %}
+            </td>
+            <td>
+                <form method="POST" action="{{ url_for('kelolauser') }}" class="reset-form" onsubmit="return confirm('Yakin ingin mereset password untuk {{ u.username }}?');">
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <input type="password" name="new_password" required placeholder="Ketik Sandi Baru...">
+                    <button type="submit" class="btn-reset">Reset</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<br>
+<a href="{{ url_for('index') }}">
+    <button type="button">Kembali ke Beranda</button>
+</a>
+{% endblock %}

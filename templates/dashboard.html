@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Keuangan{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* Mengimpor Font Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --fwm-green: #8CC63F;
+        --fwm-blue: #0072BC;
+        --fwm-red: #ED1C24;
+        --bg-light: #F8FAFB;
+        --text-dark: #1A202C;
+        --text-muted: #718096;
+        --border-color: #E2E8F0;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .mobile-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 24px 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+        color: var(--text-dark);
+        box-sizing: border-box;
+        padding-bottom: 40px;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: var(--fwm-blue);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: opacity 0.2s;
+    }
+    .btn-back:active { opacity: 0.6; }
+
+    .page-header {
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0 0 4px 0;
+        letter-spacing: -0.5px;
+    }
+    
+    .page-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    /* Styling Filter Form */
+    .filter-card {
+        background: white;
+        padding: 16px;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0,0,0,0.02);
+        margin-bottom: 24px;
+        box-sizing: border-box; /* Mencegah kartu melebar */
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+        flex-wrap: wrap; /* PERBAIKAN: Jika layar sangat sempit, akan menyusun ke bawah otomatis */
+    }
+
+    .input-group {
+        flex: 1;
+        min-width: 130px; /* PERBAIKAN: Batas aman agar input date tidak rusak */
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .input-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-input {
+        width: 100%; /* PERBAIKAN: Memaksa input tetap di dalam container */
+        box-sizing: border-box; /* PERBAIKAN: Padding tidak akan menambah lebar elemen */
+        font-family: 'Poppins', sans-serif;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border-color);
+        font-size: 13px;
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .filter-input:focus {
+        border-color: var(--fwm-blue);
+        background-color: white;
+    }
+
+    .btn-filter {
+        width: 100%;
+        background-color: var(--fwm-blue);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn-filter:active {
+        transform: scale(0.97);
+        opacity: 0.9;
+    }
+
+    /* KPI Cards Premium */
+    .kpi-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .kpi-card {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0,0,0,0.02);
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+
+    .kpi-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .kpi-title {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .kpi-value {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text-dark);
+        line-height: 1.1;
+    }
+
+    /* Variasi Warna KPI sesuai identitas FWM */
+    .kpi-blue .kpi-icon { background: rgba(0, 114, 188, 0.1); color: var(--fwm-blue); }
+    .kpi-green .kpi-icon { background: rgba(140, 198, 63, 0.15); color: #649626; }
+    .kpi-red .kpi-icon { background: rgba(237, 28, 36, 0.1); color: var(--fwm-red); }
+
+    /* Chart Container */
+    .chart-card {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0,0,0,0.02);
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 16px;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 250px; 
+        width: 100%;
+    }
+</style>
+
+<div class="mobile-container">
+    <a href="{{ url_for('index') }}" class="btn-back">
+        <span style="font-size: 18px; margin-right: 5px;">&larr;</span> Beranda
+    </a>
+
+    <div class="page-header">
+        <h2 class="page-title">Ringkasan Finansial</h2>
+        <div class="page-subtitle">
+            Periode: <strong>{{ start_date.strftime('%d %b %Y') }}</strong> - <strong>{{ end_date.strftime('%d %b %Y') }}</strong>
+        </div>
+    </div>
+    
+    <form method="GET" action="{{ url_for('dashboard') }}" class="filter-card">
+        <div class="filter-row">
+            <div class="input-group">
+                <label>Dari Tanggal</label>
+                <input type="date" name="start_date" class="filter-input" value="{{ start_date }}" required>
+            </div>
+            <div class="input-group">
+                <label>Sampai Tanggal</label>
+                <input type="date" name="end_date" class="filter-input" value="{{ end_date }}" required>
+            </div>
+        </div>
+        <button type="submit" class="btn-filter">Terapkan Filter</button>
+    </form>
+
+    <div class="kpi-container">
+        <div class="kpi-card kpi-blue">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-details">
+                <span class="kpi-title">Total Omset Keseluruhan</span>
+                <span class="kpi-value">Rp {{ "{:,}".format(total_omset).replace(',', '.') }}</span>
+            </div>
+        </div>
+        
+        <div class="kpi-card kpi-green">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-details">
+                <span class="kpi-title">Uang Masuk (Lunas)</span>
+                <span class="kpi-value">Rp {{ "{:,}".format(pendapatan_lunas).replace(',', '.') }}</span>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-red">
+            <div class="kpi-icon">⏳</div>
+            <div class="kpi-details">
+                <span class="kpi-title">Piutang (Belum Bayar)</span>
+                <span class="kpi-value">Rp {{ "{:,}".format(piutang).replace(',', '.') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-title">📈 Tren Harian</div>
+        <div class="chart-wrapper">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mengambil data dari Jinja Backend
+    const labelHari = {{ label_hari | tojson }};
+    const dataOmset = {{ data_omset | tojson }};
+    const dataPendapatan = {{ data_pendapatan | tojson }};
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    
+    // Setting global font untuk chart menyesuaikan UI
+    Chart.defaults.font.family = "'Poppins', sans-serif";
+    Chart.defaults.color = '#718096';
+
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labelHari,
+            datasets: [
+                {
+                    label: 'Total Omset',
+                    data: dataOmset,
+                    backgroundColor: 'rgba(0, 114, 188, 0.7)', /* FWM Blue dengan transparansi */
+                    borderColor: 'rgba(0, 114, 188, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                },
+                {
+                    label: 'Uang Masuk',
+                    data: dataPendapatan,
+                    backgroundColor: 'rgba(140, 198, 63, 0.85)', /* FWM Green */
+                    borderColor: 'rgba(140, 198, 63, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 11 } }
+                },
+                y: {
+                    beginAtZero: true,
+                    border: { display: false },
+                    grid: { color: '#E2E8F0', drawTicks: false },
+                    ticks: {
+                        font: { size: 10 },
+                        callback: function(value) {
+                            if(value === 0) return '0';
+                            if(value >= 1000000) return 'Rp ' + (value/1000000) + ' Jt';
+                            if(value >= 1000) return 'Rp ' + (value/1000) + ' Rb';
+                            return value;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    align: 'start',
+                    labels: {
+                        boxWidth: 10,
+                        usePointStyle: true,
+                        font: { size: 11, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(26, 32, 44, 0.9)',
+                    titleFont: { size: 13 },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
